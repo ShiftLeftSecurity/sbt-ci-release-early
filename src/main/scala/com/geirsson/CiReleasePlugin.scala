@@ -29,11 +29,8 @@ object CiReleasePlugin extends AutoPlugin {
       val highestVersion = findHighestVersion
       println(s"highest version so far: $highestVersion")
       val targetVersion = incrementVersion(highestVersion)
-
-      println(s"setting target version to $targetVersion (pushing tag)")
-      git.tag.setName(s"v$targetVersion").call
-      // git.push.
-      // TODO git push
+      tagAndPush(s"v$targetVersion")
+      // TODO set version in sbt
 
       // TODO "+publishSigned" :: "sonatypeReleaseAll" :: currentState
       currentState
@@ -55,7 +52,23 @@ object CiReleasePlugin extends AutoPlugin {
     val segments = version.split('.')
     val lastSegment = segments.last.takeWhile(_.isDigit).toInt
     val incremented = (lastSegment + 1).toString
-    (segments.dropRight(1) :+ incremented).mkString
+    (segments.dropRight(1) :+ incremented).mkString(".")
+  }
+
+  private def tagAndPush(tagName: String): Unit = {
+    println(s"tagging as $tagName")
+    git.tag.setName(tagName).call
+
+    /* couldn't get jgit to push it to the remote... `There are not any available sig algorithm`
+      * TODO use jgit for push */
+    val remote: String = {
+      val remotes = git.remoteList.call
+      assert(remotes.size == 1, "we currently only support repos that have _one_ remote configured, sorry")
+      remotes.get(0).getName
+    }
+    val cmd = s"git push $remote $tagName"
+    println(s"pushing to remote, using `$cmd`")
+    assert(cmd.! == 0, s"execution failed. command used: `$cmd`")
   }
 
   lazy val git: Git =
