@@ -29,10 +29,13 @@ object CiReleasePlugin extends AutoPlugin {
       val highestVersion = findHighestVersion
       println(s"highest version so far: $highestVersion")
       val targetVersion = incrementVersion(highestVersion)
-      println(s"setting target version to $targetVersion")
-      // TODO git tag
+
+      println(s"setting target version to $targetVersion (pushing tag)")
+      git.tag.setName(s"v$targetVersion").call
+      // git.push.
       // TODO git push
-      // TODO "+publishSigned" :: "sonatypeRelease" :: currentState
+
+      // TODO "+publishSigned" :: "sonatypeReleaseAll" :: currentState
       currentState
     }
   )
