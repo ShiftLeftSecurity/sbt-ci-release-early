@@ -30,10 +30,11 @@ object CiReleasePlugin extends AutoPlugin {
       println(s"highest version so far: $highestVersion")
       val targetVersion = incrementVersion(highestVersion)
       tagAndPush(s"v$targetVersion")
-      // TODO set version in sbt
 
-      // TODO "+publishSigned" :: "sonatypeReleaseAll" :: currentState
-      currentState
+      s"""set version := "$targetVersion"""" ::
+        "publishLocal" ::
+        currentState
+      // TODO s"""set version := "$targetVersion"""" :: "+publishSigned" :: "sonatypeReleaseAll" :: currentState
     }
   )
 
