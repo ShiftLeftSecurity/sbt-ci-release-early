@@ -19,16 +19,21 @@ object CiReleasePlugin extends AutoPlugin {
   override def requires =
     JvmPlugin && SbtPgp && DynVerPlugin && GitPlugin && Sonatype
 
-  override def buildSettings: Seq[Def.Setting[_]] = List(
-    dynverSonatypeSnapshots := true
-  )
+  // override def buildSettings: Seq[Def.Setting[_]] = List(
+  //   dynverSonatypeSnapshots := true
+  // )
 
   override def globalSettings: Seq[Def.Setting[_]] = List(
     publishArtifact.in(Test) := false,
     publishMavenStyle := true,
     commands += Command.command("ci-release") { currentState =>
       println("Running ci-release")
-      "+publishSigned" :: "sonatypeRelease" :: currentState
+      // println()
+      // println("last version: TODO")
+      // println("auto-incrementing version to: TODO")
+      // println("TODO git tag && push")
+      // TODO "+publishSigned" :: "sonatypeRelease" :: currentState
+      currentState
     }
   )
 
