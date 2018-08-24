@@ -1,7 +1,7 @@
 inThisBuild(
   List(
-    organization := "com.geirsson",
-    homepage := Some(url("https://github.com/olafurpg/sbt-ci-release")),
+    organization := "com.michaelpollmeier",
+    homepage := Some(url("https://github.com/mpollmeier/sbt-ci-release")),
     licenses := Seq(
       "Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")
     ),
@@ -11,6 +11,12 @@ inThisBuild(
         "Ólafur Páll Geirsson",
         "olafurpg@gmail.com",
         url("https://geirsson.com")
+      ),
+      Developer(
+        "mpollmeier",
+        "Michael Pollmeier",
+        "michael@michaelpollmeier.com",
+        url("https://michaelpollmeier.com")
       )
     ),
     resolvers += Resolver.sonatypeRepo("releases"),
