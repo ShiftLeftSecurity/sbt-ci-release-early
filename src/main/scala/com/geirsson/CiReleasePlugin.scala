@@ -10,6 +10,7 @@ import sbt._
 import sbt.Keys._
 import sbt.plugins.JvmPlugin
 import scala.collection.JavaConverters._
+import scala.util.{Failure, Success, Try}
 import sys.process._
 import versionsort.VersionHelper
 import xerial.sbt.Sonatype
@@ -26,16 +27,15 @@ object CiReleasePlugin extends AutoPlugin {
     commands += Command.command("ci-release") { currentState =>
       println("Running ci-release")
       val highestVersion = findHighestVersion
-      println(s"highest version: $highestVersion")
-      // println("auto-incrementing version to: TODO")
-      // println("TODO git tag && push")
+      println(s"highest version so far: $highestVersion")
+      val targetVersion = incrementVersion(highestVersion)
+      println(s"setting target version to $targetVersion")
+      // TODO git tag
+      // TODO git push
       // TODO "+publishSigned" :: "sonatypeRelease" :: currentState
       currentState
     }
   )
-
-    /* TODO allow to configure which part of the version should be incremented, e.g. via sbt.Task */
-  // private def deriveNextVersion: String = {
 
   /** based on git tags, derive the highest version */
   private def findHighestVersion: String = {
@@ -44,8 +44,15 @@ object CiReleasePlugin extends AutoPlugin {
       case gitTagVersionRegex(version) => version
     }
     assert(taggedVersions.nonEmpty, "no tagged versions found in git!")
-    val sorted = taggedVersions.sortWith { (a, b) => VersionHelper.compare(a, b) > 0 }
-    sorted.head
+    taggedVersions.sortWith { VersionHelper.compare(_, _) > 0 }.head
+  }
+
+  /* TODO allow to configure which part of the version should be incremented, e.g. via sbt.Task */
+  private def incrementVersion(version: String): String = {
+    val segments = version.split('.')
+    val lastSegment = segments.last.takeWhile(_.isDigit).toInt
+    val incremented = (lastSegment + 1).toString
+    (segments.dropRight(1) :+ incremented).mkString
   }
 
   lazy val git: Git =
