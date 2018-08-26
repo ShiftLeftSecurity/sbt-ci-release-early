@@ -57,34 +57,34 @@ addSbtPlugin("com.geirsson" % "sbt-ci-release" % "1.2.1")
 
 By installing `sbt-ci-release` the following sbt plugins are also brought in:
 
-- [sbt-dynver](https://github.com/dwijnand/sbt-dynver): sets the version number
-  based on your git history
-- [sbt-pgp](https://github.com/sbt/sbt-pgp): to cryptographically sign the
-  artifacts before publishing
-- [sbt-sonatype](https://github.com/xerial/sbt-sonatype): to publish artifacts
-  to Sonatype
-- [sbt-git](https://github.com/sbt/sbt-git): to automatically populate `scmInfo`
+- [sbt-pgp](https://github.com/sbt/sbt-pgp): to cryptographically sign the artifacts before publishing
+- [sbt-sonatype](https://github.com/xerial/sbt-sonatype): to publish artifacts to Sonatype
 
-Make sure `build.sbt` does not define any of the following settings
+Make sure `build.sbt` *does not* define any of the following settings
 
-- `version`: handled by sbt-dynver
 - `publishTo`: handled by sbt-ci-release
 - `publishMavenStyle`: handled by sbt-ci-release
 - `credentials`: handled by sbt-sonatype
 
-Next, define publishing settings at the top of `build.sbt`
+Ensure the following settings *are* defined in your `build.sbt`:
 
+- `name`
+- `organization`: must match your sonatype account priviledges
+- `licenses`
+- `developers`
+
+Example:
 ```scala
 inThisBuild(List(
-  organization := "com.geirsson",
-  homepage := Some(url("https://github.com/scalameta/sbt-scalafmt")),
+  organization := "com.michaelpollmeier",
+  homepage := Some(url("https://github.com/mpollmeier/sbt-ci-release")),
   licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
   developers := List(
     Developer(
-      "olafurpg",
-      "Ólafur Páll Geirsson",
-      "olafurpg@gmail.com",
-      url("https://geirsson.com")
+      "mpollmeier",
+      "Michael Pollmeier",
+      "michael@michaelpollmeier.com",
+      url("https://michaelpollmeier.com")
     )
   )
 ))
@@ -99,8 +99,7 @@ this project.
 gpg --gen-key
 ```
 
-- For real name, use "$PROJECT_NAME bot". For example, in Scalafmt I use
-  "Scalafmt bot"
+- For real name, use "$PROJECT_NAME bot". For example: "Scalafmt bot"
 - For email, use your own email address
 - For passphrase, generate a random password with a password manager
 

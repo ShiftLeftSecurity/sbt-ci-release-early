@@ -29,7 +29,7 @@ object CiReleasePlugin extends AutoPlugin {
       tagAndPush(s"v$targetVersion")
 
       s"""set version := "$targetVersion"""" ::
-        "publishLocal" ::
+        "publishSigned" ::
         currentState
       // TODO s"""set version := "$targetVersion"""" :: "+publishSigned" :: "sonatypeReleaseAll" :: currentState
     }
