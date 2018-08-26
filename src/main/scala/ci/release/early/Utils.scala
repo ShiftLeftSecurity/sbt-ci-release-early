@@ -51,6 +51,9 @@ object Utils {
     assert(cmd.! == 0, s"execution failed. command used: `$cmd`")
   }
 
+  def verifyGitIsClean =
+    assert(git.status.call.isClean, s"git repository (${git.getRepository.getDirectory}) isn't clean")
+
   lazy val git: Git =
     new Git(new FileRepositoryBuilder().findGitDir(new File(".")).build)
 

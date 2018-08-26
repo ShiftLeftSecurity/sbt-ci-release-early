@@ -18,6 +18,7 @@ object Plugin extends AutoPlugin {
     publishMavenStyle := true,
     commands += Command.command("ci-release") { currentState =>
       println("Running ci-release")
+      verifyGitIsClean 
       val targetVersion = determineAndTagTargetVersion
       s"""set version := "$targetVersion"""" ::
         "+publish" ::
@@ -25,6 +26,7 @@ object Plugin extends AutoPlugin {
     },
     commands += Command.command("ci-release-sonatype") { currentState =>
       println("Running ci-release-sonatype")
+      verifyGitIsClean 
       assert(pgpPassphrase.value.isDefined,
         "please specify PGP_PASSPHRASE as an evironment variable (e.g. `export PGP_PASSPHRASE='secret')")
       val targetVersion = determineAndTagTargetVersion
