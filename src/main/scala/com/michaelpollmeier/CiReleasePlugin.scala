@@ -30,8 +30,8 @@ object CiReleasePlugin extends AutoPlugin {
 
       s"""set version := "$targetVersion"""" ::
         "publishSigned" ::
+        "sonatypeReleaseAll" ::
         currentState
-      // TODO s"""set version := "$targetVersion"""" :: "+publishSigned" :: "sonatypeReleaseAll" :: currentState
     }
   )
 

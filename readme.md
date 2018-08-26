@@ -72,13 +72,17 @@ Ensure the following settings *are* defined in your `build.sbt`:
 - `organization`: must match your sonatype account priviledges
 - `licenses`
 - `developers`
+- `scmInfo`
 
 Example:
 ```scala
 inThisBuild(List(
   organization := "com.michaelpollmeier",
-  homepage := Some(url("https://github.com/mpollmeier/sbt-ci-release")),
   licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+  homepage := Some(url("https://github.com/mpollmeier/sbt-ci-release")),
+  scmInfo := Some(ScmInfo(
+      url("https://github.com/mpollmeier/sbt-ci-release-usage"),
+      "scm:git@github.com:mpollmeier/sbt-ci-release-usage.git")),
   developers := List(
     Developer(
       "mpollmeier",
