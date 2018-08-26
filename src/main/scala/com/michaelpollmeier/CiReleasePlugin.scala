@@ -1,4 +1,4 @@
-package com.geirsson
+package com.michaelpollmeier
 
 import com.typesafe.sbt.SbtPgp
 import com.typesafe.sbt.SbtPgp.autoImport._
@@ -26,7 +26,8 @@ object CiReleasePlugin extends AutoPlugin {
     publishMavenStyle := true,
     commands += Command.command("ci-release") { currentState =>
       println("Running ci-release")
-      val highestVersion = findHighestVersion
+      val allTags = git.tagList.call.asScala.map(_.getName).toList
+      val highestVersion = findHighestVersion(allTags)
       println(s"highest version so far: $highestVersion")
       val targetVersion = incrementVersion(highestVersion)
       tagAndPush(s"v$targetVersion")
@@ -39,9 +40,8 @@ object CiReleasePlugin extends AutoPlugin {
   )
 
   /** based on git tags, derive the highest version */
-  private def findHighestVersion: String = {
-    val allTags = git.tagList.call.asScala
-    val taggedVersions = allTags.map(_.getName).collect {
+  private[michaelpollmeier] def findHighestVersion(tags: List[String]): String = {
+    val taggedVersions = tags.collect {
       case gitTagVersionRegex(version) => version
     }
     assert(taggedVersions.nonEmpty, "no tagged versions found in git!")
@@ -75,7 +75,7 @@ object CiReleasePlugin extends AutoPlugin {
   lazy val git: Git =
     new Git(new FileRepositoryBuilder().findGitDir(new File(".")).build)
 
-  lazy val gitTagVersionRegex = """refs/tags/v(.*?)""".r
+  lazy val gitTagVersionRegex = """refs/tags/v([0-9\.]+)""".r
 
   override def projectSettings: Seq[Def.Setting[_]] = List(
     publishTo := sonatypePublishTo.value
