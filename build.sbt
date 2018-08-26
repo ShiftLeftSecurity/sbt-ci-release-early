@@ -1,6 +1,7 @@
 moduleName := "sbt-ci-release"
 organization := "com.michaelpollmeier"
 sbtPlugin := true
+version := "0.0.2" // TODO use this plugin for itself
 
 scalaVersion := "2.12.6"
 libraryDependencies ++= List(
@@ -31,3 +32,4 @@ developers := List(
 )
 resolvers += Resolver.sonatypeRepo("releases")
 
+ThisBuild/publishTo := Some("releases" at "https://shiftleft.jfrog.io/shiftleft/libs-release-local")
