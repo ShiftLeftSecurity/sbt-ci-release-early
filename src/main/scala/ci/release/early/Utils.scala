@@ -1,42 +1,25 @@
-package com.michaelpollmeier
+package ci.release.early
 
-import com.typesafe.sbt.SbtPgp
 import java.io.File
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
-import sbt._
-import sbt.Keys._
 import scala.collection.JavaConverters._
 import sys.process._
 import versionsort.VersionHelper
-import xerial.sbt.Sonatype
-import xerial.sbt.Sonatype.autoImport._
 
-object CiReleasePlugin extends AutoPlugin {
+object Utils {
 
-  override def trigger = allRequirements
-  override def requires = SbtPgp && Sonatype
-
-  override def globalSettings: Seq[Def.Setting[_]] = List(
-    publishArtifact.in(Test) := false,
-    publishMavenStyle := true,
-    commands += Command.command("ci-release") { currentState =>
-      println("Running ci-release")
-      val allTags = git.tagList.call.asScala.map(_.getName).toList
-      val highestVersion = findHighestVersion(allTags)
-      println(s"highest version so far: $highestVersion")
-      val targetVersion = incrementVersion(highestVersion)
-      tagAndPush(s"v$targetVersion")
-
-      s"""set version := "$targetVersion"""" ::
-        "publishSigned" ::
-        "sonatypeReleaseAll" ::
-        currentState
-    }
-  )
+  def determineAndTagTargetVersion: String = {
+    val allTags = git.tagList.call.asScala.map(_.getName).toList
+    val highestVersion = findHighestVersion(allTags)
+    println(s"highest version so far: $highestVersion")
+    val targetVersion = incrementVersion(highestVersion)
+    tagAndPush(s"v$targetVersion")
+    targetVersion
+  }
 
   /** based on git tags, derive the highest version */
-  private[michaelpollmeier] def findHighestVersion(tags: List[String]): String = {
+  def findHighestVersion(tags: List[String]): String = {
     val taggedVersions = tags.collect {
       case gitTagVersionRegex(version) => version
     }
@@ -45,14 +28,14 @@ object CiReleasePlugin extends AutoPlugin {
   }
 
   /* TODO allow to configure which part of the version should be incremented, e.g. via sbt.Task */
-  private[michaelpollmeier] def incrementVersion(version: String): String = {
+  def incrementVersion(version: String): String = {
     val segments = version.split('.')
     val lastSegment = segments.last.takeWhile(_.isDigit).toInt
     val incremented = (lastSegment + 1).toString
     (segments.dropRight(1) :+ incremented).mkString(".")
   }
 
-  private def tagAndPush(tagName: String): Unit = {
+  def tagAndPush(tagName: String): Unit = {
     println(s"tagging as $tagName")
     git.tag.setName(tagName).call
 
@@ -72,8 +55,4 @@ object CiReleasePlugin extends AutoPlugin {
     new Git(new FileRepositoryBuilder().findGitDir(new File(".")).build)
 
   lazy val gitTagVersionRegex = """refs/tags/v([0-9\.]+)""".r
-
-  override def projectSettings: Seq[Def.Setting[_]] = List(
-    publishTo := sonatypePublishTo.value
-  )
 }
