@@ -49,7 +49,7 @@ object CiReleasePlugin extends AutoPlugin {
   }
 
   /* TODO allow to configure which part of the version should be incremented, e.g. via sbt.Task */
-  private def incrementVersion(version: String): String = {
+  private[michaelpollmeier] def incrementVersion(version: String): String = {
     val segments = version.split('.')
     val lastSegment = segments.last.takeWhile(_.isDigit).toInt
     val incremented = (lastSegment + 1).toString

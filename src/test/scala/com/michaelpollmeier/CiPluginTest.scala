@@ -12,4 +12,12 @@ class CiReleasePluginTest extends WordSpec with Matchers {
     CiReleasePlugin.findHighestVersion(List("refs/tags/validationAttempt5", "refs/tags/v0.1")) shouldBe "0.1"
   }
 
+  "increment version" in {
+    CiReleasePlugin.incrementVersion("1") shouldBe "2"
+    CiReleasePlugin.incrementVersion("1.0") shouldBe "1.1"
+    CiReleasePlugin.incrementVersion("1.0.0") shouldBe "1.0.1"
+    CiReleasePlugin.incrementVersion("1.0.0-hotfix") shouldBe "1.0.1"
+    CiReleasePlugin.incrementVersion("1.0.0-hotfix2") shouldBe "1.0.1"
+  }
+
 }
