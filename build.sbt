@@ -1,7 +1,7 @@
 moduleName := "sbt-ci-release"
 organization := "com.michaelpollmeier"
 sbtPlugin := true
-version := "0.0.2" // TODO use this plugin for itself
+version := "0.0.3-SNAPSHOT" // TODO use this plugin for itself
 
 scalaVersion := "2.12.6"
 libraryDependencies ++= List(
