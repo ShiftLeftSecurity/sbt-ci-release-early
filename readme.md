@@ -77,7 +77,7 @@ Ensure the following settings *are* defined in your `build.sbt`:
 Example:
 ```scala
 inThisBuild(List(
-  organization := "com.michaelpollmeier",
+  organization := "io.shiftleft",
   licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
   homepage := Some(url("https://github.com/mpollmeier/sbt-ci-release")),
   scmInfo := Some(ScmInfo(
