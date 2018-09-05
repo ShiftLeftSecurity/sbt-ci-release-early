@@ -1,7 +1,7 @@
 moduleName := "sbt-ci-release-early"
 organization := "io.shiftleft"
 sbtPlugin := true
-version := "0.0.4-SNAPSHOT" // TODO use this plugin for itself
+version := "0.0.4" // TODO use this plugin for itself
 
 scalaVersion := "2.12.6"
 libraryDependencies ++= List(
@@ -14,7 +14,7 @@ addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.1.1")
 scriptedLaunchOpts += s"-Dplugin.version=${version.value}"
 scriptedBufferLog := false
 
-homepage := Some(url("https://github.com/mpollmeier/sbt-ci-release"))
+homepage := Some(url("https://github.com/ShiftLeftSecurity/sbt-ci-release-early"))
 licenses := Seq("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
 developers := List(
   Developer(
@@ -32,4 +32,5 @@ developers := List(
 )
 resolvers += Resolver.sonatypeRepo("releases")
 
-ThisBuild/publishTo := Some("releases" at "https://shiftleft.jfrog.io/shiftleft/libs-release-local")
+// publishTo := Some("releases" at "https://shiftleft.jfrog.io/shiftleft/libs-release-local")
+publishTo := sonatypePublishTo.value

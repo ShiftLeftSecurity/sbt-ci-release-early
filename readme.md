@@ -1,4 +1,4 @@
-# sbt-ci-release
+# sbt-ci-release-early
 
 [![Build Status](https://travis-ci.org/olafurpg/sbt-ci-release.svg?branch=master)](https://travis-ci.org/olafurpg/sbt-ci-release)
 
