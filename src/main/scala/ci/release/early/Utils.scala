@@ -51,8 +51,23 @@ object Utils {
     assert(cmd.! == 0, s"execution failed. command used: `$cmd`")
   }
 
-  def verifyGitIsClean =
-    assert(git.status.call.isClean, s"git repository (${git.getRepository.getDirectory}) isn't clean")
+  def verifyGitIsClean = {
+    val status = git.status.call
+    val path = git.getRepository.getDirectory.getAbsolutePath
+    assert(status.isClean, 
+      s"""git repository ($path) isn't clean. Some indication of what it may be:
+         |changed: ${status.getChanged}
+         |changed: ${status.getChanged}
+         |conflicting: ${status.getConflicting}
+         |added: ${status.getAdded}
+         |missing: ${status.getMissing}
+         |modified: ${status.getModified}
+         |removed: ${status.getRemoved}
+         |uncommitted: ${status.getUncommittedChanges}
+         |untracked: ${status.getUntracked}
+         |untrackedFolders: ${status.getUntrackedFolders}
+      """.stripMargin)
+  }
 
   lazy val git: Git =
     new Git(new FileRepositoryBuilder().findGitDir(new File(".")).build)
