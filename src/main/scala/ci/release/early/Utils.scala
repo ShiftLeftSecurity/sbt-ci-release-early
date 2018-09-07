@@ -4,6 +4,7 @@ import java.io.File
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import scala.collection.JavaConverters._
+import scala.util.Try
 import sys.process._
 import versionsort.VersionHelper
 
@@ -39,19 +40,31 @@ object Utils {
     println(s"tagging as $tagName")
     git.tag.setName(tagName).call
 
-    import scala.collection.JavaConverters._
-
-    /* couldn't get jgit to push it to the remote... `There are not any available sig algorithm`
-      * TODO use jgit for push */
-    val remote: String = {
+    /* couldn't get jgit to push it to the remote... falling back to installed version of git
+     * jgit error: `There are not any available sig algorithm`... no idea */
+    val remoteUri: String = {
       val remotes = git.remoteList.call
       assert(remotes.size == 1, "we currently only support repos that have _one_ remote configured, sorry")
-      remotes.get(0).getName
+      val uri = remotes.get(0).getURIs.get(0).toString
+      println(s"pushing tag to uri=$uri")
+      Option(System.getenv("GITHUB_TOKEN")) match {
+        case None => uri
+        case Some(token) =>
+          println(s"env var GITHUB_TOKEN found, trying to interweave it with the remote uri ($uri)")
+          interweaveGithubToken(token, uri).get
+      }
     }
-    val cmd = s"git push $remote $tagName"
-    println(s"pushing to remote, using `$cmd`")
-    assert(cmd.! == 0, s"execution failed. command used: `$cmd`")
+
+    val cmd = s"git push $remoteUri $tagName"
+    assert(cmd.! == 0, s"failed to push the new tag to the remote ($remoteUri)")
   }
+
+  /** note: only works for https urls */
+  def interweaveGithubToken(token: String, repoUri: String): Try[String] =
+    Try {
+      assert(repoUri.startsWith("https://"), "interlacing github tokens only works with `https://` urls")
+      s"https://${token}@" + repoUri.drop(8)
+    }
 
   def verifyGitIsClean = {
     val status = git.status.call

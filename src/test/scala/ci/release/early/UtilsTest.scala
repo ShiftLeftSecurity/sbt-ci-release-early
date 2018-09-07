@@ -20,4 +20,13 @@ class UtilsTest extends WordSpec with Matchers {
     Utils.incrementVersion("1.0.0-hotfix2") shouldBe "1.0.1"
   }
 
+  "interweave github token into repository url" in {
+    val token = "abc"
+    Utils.interweaveGithubToken(token, repoUri = "not-a-uri") shouldBe 'failure
+    Utils.interweaveGithubToken(token, repoUri = "git@github.com:not-an-http-uri.git") shouldBe 'failure
+
+    Utils.interweaveGithubToken(token, repoUri = "https://github.com/user/repo.git")
+      .get shouldBe s"https://${token}@github.com/user/repo.git"
+  }
+
 }
