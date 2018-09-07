@@ -123,47 +123,32 @@ below. The ID will look something like
 export LONG_ID=6E8ED79B03AD527F1B281169D28FC818985732D9
 ```
 
-Next, copy the public gpg signature
+Next, submit the public key to a keyserver:
 
 ```
-# macOS
-gpg --armor --export $LONG_ID | pbcopy
-# linux
-gpg --armor --export $LONG_ID | xclip
+gpg --send-keys $LONG_ID
 ```
 
-and post the signature to a keyserver: https://pgp.mit.edu/
+And finally export the private key locally so we can later encrypt it for travis. Make sure you don't publish this anywhere. The actual damage is small since it's just for this project, but people will look down on you :)
 
-![mit_pgp_key_server](https://user-images.githubusercontent.com/1408093/41208114-b8c89dce-6d1f-11e8-9280-9ab2b70bb0d7.jpg)
+```
+gpg --armor --export-secret-keys $LONG_ID > private-key.pem
+echo "private-key.pem" >> .gitignore
+```
 
 ## Travis
 
 Next, open the "Settings" panel for your project on Travis CI, for example
-https://travis-ci.org/scalameta/sbt-scalafmt/settings.
+https://travis-ci.org/mpollmeier/sbt-ci-release-early-usage/settings
 
-Define four secret variables
+Define secret variables
 
 ![](https://user-images.githubusercontent.com/1408093/41207402-bbb3970a-6d15-11e8-8772-000cc194ee92.png)
 
-- `PGP_PASSPHRASE`: The randomly generated password you used to create a fresh
-  gpg key.
-- `PGP_SECRET`: The base64 encoded secret of your private key that you can
-  export from the command line like here below
-
-```
-# macOS
-gpg --armor --export-secret-keys $LONG_ID | base64 | pbcopy
-# Ubuntu (assuming GNU base64)
-gpg --armor --export-secret-keys $LONG_ID | base64 -w0 | xclip
-# FreeBSD (assuming BSD base64)
-gpg --armor --export-secret-keys $LONG_ID | base64 | xclip
-```
-
-- `SONATYPE_PASSWORD`: The password you use to log into
-  https://oss.sonatype.org/
 - `SONATYPE_USERNAME`: The email you use to log into https://oss.sonatype.org/
-- (optional) `CI_RELEASE`: the command to publish all artifacts for stable releases. Defaults to `+publishSigned` if not provided.
-- (optional) `CI_SNAPSHOT_RELEASE`: the command to publish all artifacts for a SNAPSHOT releases. Defaults to `+publish` if not provided.
+- `SONATYPE_PASSWORD`: The password you use to log into https://oss.sonatype.org/
+- `PGP_PASSPHRASE`: The randomly generated password you used to create a fresh gpg key.
+- `GH_TOKEN`: the token that allows travis to push to your remote git(hub) repository
 
 ### .travis.yml
 
@@ -173,8 +158,7 @@ master and on tag push. There are many ways to do this, but I recommend using
 necessary to use build stages but they make it easy to avoid publishing the
 same module multiple times from parallel jobs.
 
-- First, ensure that git tags are always fetched so that sbt-dynver can pick up
-  the correct `version`
+- First, ensure that git tags are always fetched so that we can determine the correct version
 
 ```yml
 before_install:
@@ -203,6 +187,12 @@ jobs:
     # run ci-release only if previous stages passed
     - stage: release
       script: sbt ci-release
+```
+
+- Last lastely, share the private key with travis. Note that this has to be run from within the repository.
+
+```
+travis encrypt-file private-key.pem --add
 ```
 
 Notes:

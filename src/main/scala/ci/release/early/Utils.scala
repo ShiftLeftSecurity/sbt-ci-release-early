@@ -39,6 +39,8 @@ object Utils {
     println(s"tagging as $tagName")
     git.tag.setName(tagName).call
 
+    import scala.collection.JavaConverters._
+
     /* couldn't get jgit to push it to the remote... `There are not any available sig algorithm`
       * TODO use jgit for push */
     val remote: String = {

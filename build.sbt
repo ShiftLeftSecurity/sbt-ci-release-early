@@ -6,6 +6,7 @@ version := "0.0.6-SNAPSHOT" // TODO use this plugin for itself
 scalaVersion := "2.12.6"
 libraryDependencies ++= List(
   "org.eclipse.jgit" % "org.eclipse.jgit" % "5.0.2.201807311906-r",
+  "com.michaelpollmeier" % "versionsort" % "1.0.0",
   "org.scalatest" %% "scalatest" % "3.0.3" % Test
 )
 addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "2.3")
