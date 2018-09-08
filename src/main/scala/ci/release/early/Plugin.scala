@@ -27,7 +27,7 @@ object Plugin extends AutoPlugin {
       println("Running ci-release")
       verifyGitIsClean 
       val targetVersion = determineAndTagTargetVersion
-      s"""set version := "$targetVersion"""" ::
+      s"""set ThisBuild/version := "$targetVersion"""" ::
         "verifyNoSnapshotDependencies" ::
         "+publish" ::
         state
@@ -38,7 +38,7 @@ object Plugin extends AutoPlugin {
       assert(pgpPassphrase.value.isDefined,
         "please specify PGP_PASSPHRASE as an environment variable (e.g. `export PGP_PASSPHRASE='secret')")
       val targetVersion = determineAndTagTargetVersion
-      s"""set version := "$targetVersion"""" ::
+      s"""set ThisBuild/version := "$targetVersion"""" ::
         "verifyNoSnapshotDependencies" ::
         "+publishSigned" ::
         "sonatypeReleaseAll" ::

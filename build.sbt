@@ -1,7 +1,7 @@
 moduleName := "sbt-ci-release-early"
 organization := "io.shiftleft"
 sbtPlugin := true
-version := "1.0.1-SNAPSHOT"
+version := "1.0.1"
 
 scalaVersion := "2.12.6"
 libraryDependencies ++= List(

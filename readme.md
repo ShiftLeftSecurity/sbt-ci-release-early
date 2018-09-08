@@ -123,17 +123,17 @@ below. The ID will look something like
 export LONG_ID=6E8ED79B03AD527F1B281169D28FC818985732D9
 ```
 
-Next, submit the public key to a keyserver:
+Submit the public key to a keyserver:
 
 ```
 gpg --send-keys $LONG_ID
 ```
 
-And finally export the private key locally so we can later encrypt it for travis. Make sure you don't publish this anywhere. The actual damage is small since it's just for this project, but people will look down on you :)
+Then export the private key locally so we can later encrypt it for travis. Make sure you don't publish this anywhere. The actual damage is small since it's just for this project, but people will look down on you :)
 
 ```
 gpg --armor --export-secret-keys $LONG_ID > private-key.pem
-echo "private-key.pem" >> .gitignore
+echo "\nprivate-key.pem" >> .gitignore
 ```
 
 ## Travis
