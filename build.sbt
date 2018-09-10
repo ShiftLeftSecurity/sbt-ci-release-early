@@ -11,9 +11,6 @@ libraryDependencies ++= List(
 addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "2.3")
 addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.1.1")
 
-scriptedLaunchOpts += s"-Dplugin.version=${version.value}"
-scriptedBufferLog := false
-
 homepage := Some(url("https://github.com/ShiftLeftSecurity/sbt-ci-release-early"))
 scmInfo := Some(ScmInfo(
   url("https://github.com/ShiftLeftSecurity/sbt-ci-release-early"),
