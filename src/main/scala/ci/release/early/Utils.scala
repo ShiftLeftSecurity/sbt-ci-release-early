@@ -24,8 +24,14 @@ object Utils {
     val taggedVersions = tags.collect {
       case gitTagVersionRegex(version) => version
     }
-    assert(taggedVersions.nonEmpty, "no tagged versions found in git!")
-    taggedVersions.sortWith { VersionHelper.compare(_, _) > 0 }.head
+
+    if (taggedVersions.isEmpty) {
+      val defaultVersion = "0.1.0"
+      println(s"no tagged versions found in git, starting with $defaultVersion")
+      defaultVersion
+    } else {
+      taggedVersions.sortWith { VersionHelper.compare(_, _) > 0 }.head
+    }
   }
 
   /* TODO allow to configure which part of the version should be incremented, e.g. via sbt.Task */

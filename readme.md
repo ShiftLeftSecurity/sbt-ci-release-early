@@ -1,21 +1,58 @@
 # sbt-ci-release-early
 
-[![Build Status](https://travis-ci.org/olafurpg/sbt-ci-release.svg?branch=master)](https://travis-ci.org/olafurpg/sbt-ci-release)
+[![Build Status](https://travis-ci.org/ShiftLeftSecurity/sbt-ci-release-early.svg?branch=master)](https://travis-ci.org/ShiftLeftSecurity/sbt-ci-release-early)
+[![Scaladex](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)
 
-This is an sbt plugin to help automate releases to Sonatype and Maven Central from Travis CI
+Sbt plugin for fully automated releases, without SNAPSHOT and git sha's in the version. A remix of the best ideas from [sbt-ci-release](https://github.com/olafurpg/sbt-ci-release) and [sbt-release-early](https://github.com/scalacenter/sbt-release-early/).
 
-- git tag pushes are published as regular releases to Maven Central
-- merge into master commits are published as -SNAPSHOT with a unique version
-  number for every commit
+Features:
+* detects last version from git (e.g. `v1.0.0`) and increments the last digit, i.e. the next release is automatically inferred as `v1.0.1`
+* no more git hashes in the released version
+* no more need to manually tag the builds
+* builds the release, creates and pushes the git tag, publishes the artifact
+* `ci-release` for your in-house setup (e.g. jenkins/artifactory/nexus etc), very easy to configure
+* `ci-release-sonatype` for your open source travis/sonatype/maven central setup, a little more involved to configure
+* easy to test locally (faster turnaround than debugging on travis.ci)
+* automatically handles cross release for multiple scala versions
+* verifies that your build does not depend on any snapshot dependencies
 
-Beware that publishing from Travis CI requires you to expose Sonatype
-credentials as secret environment variables in Travis CI jobs. However,
-secret environment variables are not accessible during pull requests.
-
-Let's get started!
+# TODO skim through old readme, cleanup
+# TODO factor in
+## public build (travis.ci)
+Note: the plugin doesn't have any dependency on travis.ci and will work with any other public build server.
+* requirement: travis needs to be able to push to your repository
+  * explain steps. screenshot in ~
+  https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/
+* section for jenkins/manual
+  * for sonatype: configure `publishTo := sonatypePublishTo.value` in build.sbt
+* SCM info etc: travis specific
+* set PGP_PASSPHRASE as an environment variable
+* list/delete failed staging attempts on sonatype:
+  `sonatypeStagingRepositoryProfiles` // lists staging repo ids
+  `sonatypeDrop [id]`
+* this originally started as a fork of sbt-ci-release by olafurpg, but quickly evolved into something new, so I gave it a new name. 
+* subprojects: can run `publish`, the version is already set for you :)
+* describe simple key handling that works consistently 
+* how do I release a specific version? 
+  To keep things simple I decided to not add that feature to this plugin. I.e. if you want to release a specific version you have to do that yourself, e.g. by running the following sbt commands:
+  ```
+    set version := "1.2.3"
+    +publishSigned
+    sonatypeReleaseAll
+  ```
+  Followed by `git tag v1.2.3 && git push origin v1.2.3`.
+  Note to future self: this would have added complexity because to trigger it we would rely on git tags, and we need a foolproof way to check if a given tag has already been released. My intial thought was to tag anything released with `_released_1.0.1_`, but it was getting quite complicated for handling an edge case. 
+* differences to the original from olafur:
+* verifies that there are no snapshot dependencies (copied from sbt-release)
+* less dependencies on other plugins
+* this plugin automatically increases your version, rather than appending a long suffix to the last version (resulting in in e.g. version `1.2.2` rather than `1.2.1+1-1955bf0a+20180824-0758`)
+* downside: you have less control over which version exactly is being built
+* it tags that version automatically
+* not specifically on travis.ci. It's even easier to use it on your own jenkins and artifactory
 
 <!-- TOC depthFrom:2 depthTo:2 -->
 
+- [In-house setup](#In-house)
 - [Sonatype](#sonatype)
 - [sbt](#sbt)
 - [GPG](#gpg)
@@ -25,6 +62,29 @@ Let's get started!
 - [Alternatives](#alternatives)
 
 <!-- /TOC -->
+
+
+## In-house setup
+The majority of builds aren't in the open, but on private machines (e.g. jenkins), published to a private repository like nexus or artifactory. 
+Since those internal repositories typically don't impose constraints on the published artifacts, the setup is straightforward:
+
+1) `projects/plugins.sbt`:
+```
+addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "1.0.3")
+```
+Latest version: [![Scaladex](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)
+
+2) Make sure the typical `publishTo` variable in your `built.sbt` points to your repository.
+
+3) Check if 
+If you don't have any version tags in git yet
+
+, and you can just run 
+```
+sbt ci-release
+```
+as part of your build pipeline, and that's all. 
+
 
 ## Sonatype
 
@@ -235,22 +295,11 @@ Enjoy 👌
 
 ### How do I disable publishing in certain projects?
 
-Add the following to the project settings (works only in sbt 1)
+Add the following to the project settings:
 
 ```scala
 skip in publish := true
 ```
-
-### How do I publish cross-built projects?
-
-Make sure that projects that compile against multiple Scala versions declare the `crossScalaVersions` setting in build.sbt, for example
-```scala
-lazy val core = project.settings(
-  ...
-  crossScalaVersions := List("2.12.6", "2.11.12")
-)
-```
-The command `+publishSigned` (default value for `CI_RELEASE`) will then publish that project for both 2.11 and 2.12.
 
 ### Can I depend on Maven Central releases immediately?
 
@@ -261,83 +310,23 @@ artifacts with
 resolvers += Resolver.sonatypeRepo("releases")
 ```
 
-(optional) Use the
-[coursier](https://github.com/coursier/coursier/#command-line) command line
-interface to check if a release was successful without opening sbt
-
-```bash
-coursier fetch com.geirsson:scalafmt-cli_2.12:1.5.0 -r sonatype:releases
-```
-
-### How do I depend on the SNAPSHOT releases?
-
-Add the following setting
-
-```scala
-resolvers += Resolver.sonatypeRepo("snapshots")
-```
-
-(optional) With coursier you can do the same thing with `-r sonatype:snapshots`
-
-```bash
-coursier fetch com.geirsson:scalafmt-cli_2.12:1.5.0-SNAPSHOT -r sonatype:snapshots
-```
-
-### What about other CIs environments than Travis?
-
-You can try
-[sbt-release-early](https://github.com/scalacenter/sbt-release-early).
-
-Alternatively, the source code for sbt-ci-release is only ~50 loc, see
-[CiReleasePlugin.scala](https://github.com/olafurpg/sbt-ci-release/blob/master/plugin/src/main/scala/com/geirsson/CiReleasePlugin.scala).
-You can copy-paste it to `project/` of your build and tweak the settings for
-your environment.
-
-### Does sbt-ci-release work for sbt 0.13?
-
-Yes, but the plugin is not released for sbt 0.13. The plugin source code is a
-single file which you can copy-paste into `project/CiReleasePlugin.scala` of
-your 0.13 build. Make sure you also
-`addSbtPlugin(sbt-dynver + sbt-sonatype + sbt-gpg + sbt-git)`.
-
-### How do I publish sbt plugins?
+### Can I publish sbt plugins?
 
 You can publish sbt plugins to Maven Central like a normal library, no custom
-setup required. It is not necessary to publish sbt plugins to Bintray.
+setup required. In fact, this plugin is published with a previous version of itself :)
 
-### java.io.IOException: secret key ring doesn't start with secret key tag: tag 0xffffffff
-
-- Make sure you exported the correct `LONG_ID` for the gpg key.
-- Make sure the base64 exported secret GPG key is a single line (not line wrapped). If you use the GNU coreutils `base64` (default on Ubuntu), pass in the `-w0` flag to disable line wrapping.
-
-### java.io.IOException: PUT operation to URL https://oss.sonatype.org/content/repositories/snapshots 400: Bad Request
-
-This error happens when you publish a non-SNAPSHOT version to the snapshot
-repository. If you pushed a tag, make sure the tag version number starts with
-`v`. This error can happen if you tag with the version `0.1.0` instead of
-`v0.1.0`.
-
-### Failed: signature-staging, failureMessage:Missing Signature:
-
-Make sure to upgrade to the latest sbt-ci-release, which could fix this error.
-This failure can happen in case you push a git tag immediately after merging
-a branch into master. A manual workaround is to log into https://oss.sonatype.org/
-and drop the failing repository from the web UI.
-Alternatively, you can run `sonatypeDrop <staging-repo-id>` from the sbt shell instead
-of using the web UI.
 
 ## Alternatives
 
 There exist great alternatives to sbt-ci-release that may work better for your
 setup.
 
+- [sbt-ci-release](https://github.com/olafurpg/sbt-ci-release):
+  Releases versions that you previously tagged in git (rather than automatically tagging every build).
+  This plugin started as a fork of sbt-ci-release. 
+  I ran into [some issues](https://github.com/olafurpg/sbt-ci-release/issues/13) with gpg keys, ymmv. 
 - [sbt-release-early](https://github.com/scalacenter/sbt-release-early):
-  additionally supports publishing to Bintray and other CI environments than
-  Travis.
+  additionally supports publishing to Bintray
 - [sbt-rig](https://github.com/Verizon/sbt-rig): additionally supporting
   publishing code coverage reports, managing test dependencies and publishing
   docs.
-
-The biggest difference between these and sbt-ci-release wrt to publishing is the
-base64 encoded `PGP_SECRET` variable. I never managed to get the encrypted files
-and openssl working.
