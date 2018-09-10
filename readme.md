@@ -64,27 +64,25 @@ Note: the plugin doesn't have any dependency on travis.ci and will work with any
 <!-- /TOC -->
 
 
-## In-house setup
-The majority of builds aren't in the open, but on private machines (e.g. jenkins), published to a private repository like nexus or artifactory. 
-Since those internal repositories typically don't impose constraints on the published artifacts, the setup is straightforward:
+## In-house setup (e.g. jenkins/artifactory)
+The majority of builds aren't in the open, but on private machines (e.g. jenkins), published to a private repository like nexus or artifactory. Setup:
 
 1) `projects/plugins.sbt`:
 ```
-addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "1.0.3")
+addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "1.0.4")
 ```
 Latest version: [![Scaladex](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)
 
-2) Make sure the typical `publishTo` variable in your `built.sbt` points to your repository.
+2) Make sure the typical `publishTo` variable in your `built.sbt` points to your repository (this isn't specific to this plugin).
 
-3) Check if 
-If you don't have any version tags in git yet
-
-, and you can just run 
+Just run 
 ```
 sbt ci-release
 ```
 as part of your build pipeline, and that's all. 
 
+## Public build (e.g. travis.ci/sonatype)
+Since those internal repositories typically don't impose constraints on the published artifacts,
 
 ## Sonatype
 

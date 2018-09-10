@@ -1,15 +1,17 @@
 package ci.release.early
 
 import org.scalatest._
-import scala.util.Try
 
 class UtilsTest extends WordSpec with Matchers {
 
-  "find highest version" in {
-    Try { Utils.findHighestVersion(Nil) } shouldBe 'failure
+  "find highest version from taglist" in {
     Utils.findHighestVersion(List("refs/tags/v1.0.0")) shouldBe "1.0.0"
     Utils.findHighestVersion(List("refs/tags/v1.10", "refs/tags/v1.9")) shouldBe "1.10"
     Utils.findHighestVersion(List("refs/tags/validationAttempt5", "refs/tags/v0.1")) shouldBe "0.1"
+  }
+
+  "defaults to `0.1.0` if no version tags available" in {
+    Utils.findHighestVersion(Nil) shouldBe "0.1.0"
   }
 
   "increment version" in {
