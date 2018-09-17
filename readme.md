@@ -192,6 +192,14 @@ By installing `sbt-ci-release-early` the following sbt plugins are also brought 
 
 ## FAQ
 
+### How can determine the latest released version?
+
+Other than manually looking at sonatype/maven central or git tags, you can use the following snippet that remotely gets the git tags that start with `v` and have (in this version) three decimals separated by `.`, and returns the highest version. 
+
+```
+git ls-remote --tags $REPO | awk -F"/" '{print $3}' | grep '^v[0-9]*\.[0-9]*\.[0-9]*' | grep -v {} | sort --version-sort | tail -n1
+```
+
 ### My sonatype staging repos seems to be in a broken state
 When a build is e.g. interrupted, or didn't satisfy the sonatype requirements for publishing, it is likely that these artifacts are still lying around in the sonatype staging area. You can log into https://oss.sonatype.org/ and clean it up, or just do it from within sbt, locally on your machine:
 
