@@ -30,12 +30,12 @@ Sbt plugin for fully automated releases, without SNAPSHOT and git sha's in the v
 
 Add the dependency in your `projects/plugins.sbt`:
 ```
-addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "1.0.4")
+addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "1.0.6")
 ```
 Latest version: [![Scaladex](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)
 
 ## In-house setup (e.g. jenkins/artifactory)
-Make sure the typical `publishTo` variable in your `built.sbt` points to your repository (this isn't specific to this plugin).
+Make sure the typical `publishTo` variable in your `built.sbt` points to your repository (this isn't specific to this plugin). Example: `ThisBuild / publishTo := Some("releases" at "https://shiftleft.jfrog.io/shiftleft/libs-release-local")`
 
 Then just run `ci-release` as part of your build pipeline:
 ```
