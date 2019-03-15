@@ -177,7 +177,7 @@ cache:
   - "$HOME/.coursier"
 ```
 
-Finally, share the private key with travis. Note that this has to be run from within the repository.
+Finally, share the private key with travis. Note that this has to be run from within the repository. If you haven't yet, you'll need to install [travis](https://github.com/travis-ci/travis.rb) (e.g. with `gem install travis`). 
 
 ```
 travis encrypt-file private-key.pem --add
