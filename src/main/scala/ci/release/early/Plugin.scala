@@ -41,7 +41,7 @@ object Plugin extends AutoPlugin {
       s"""set ThisBuild/version := "$targetVersion"""" ::
         "verifyNoSnapshotDependencies" ::
         "+publishSigned" ::
-        "sonatypeReleaseAll" ::
+        "sonatypeRelease" ::
         state
     }
   )
