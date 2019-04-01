@@ -30,7 +30,7 @@ Sbt plugin for fully automated releases, without SNAPSHOT and git sha's in the v
 
 Add the dependency in your `projects/plugins.sbt`:
 ```
-addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "1.0.6")
+addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "1.0.10")
 ```
 Latest version: [![Scaladex](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)
 
