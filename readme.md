@@ -267,3 +267,5 @@ There exist great alternatives to sbt-ci-release-early that may work better for 
 - [sbt-rig](https://github.com/Verizon/sbt-rig): additionally supporting
   publishing code coverage reports, managing test dependencies and publishing
   docs.
+  
+
