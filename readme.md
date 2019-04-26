@@ -35,9 +35,17 @@ addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "1.0.12")
 Latest version: [![Scaladex](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)
 
 ## In-house setup (e.g. jenkins/artifactory)
-Make sure the typical `publishTo` variable in your `built.sbt` points to your repository (this isn't specific to this plugin). Example: `ThisBuild / publishTo := Some("releases" at "https://shiftleft.jfrog.io/shiftleft/libs-release-local")`
+Make sure the typical `publishTo` variable in your `built.sbt` points to your repository (this isn't specific to this plugin). Example in `build.sbt`:
+```
+ThisBuild / publishTo := Some("releases" at "https://shiftleft.jfrog.io/shiftleft/libs-release-local")
+```
 
-Then just run `ci-release` as part of your build pipeline:
+If you don't have any previous versions tagged in git, do so manually now (only one initial tag necessary). N.b. other versioning schemes like `v1`, `v0.1`, `v0.0.0.1` will work as well. 
+```
+git tag v0.0.1
+```
+
+Then just run `ci-release` - you can first try this locally, and then as part of your build pipeline:
 ```
 sbt ci-release
 ```
@@ -76,6 +84,12 @@ inThisBuild(List(
     Developer("mpollmeier", "Michael Pollmeier", "michael@michaelpollmeier.com", url("https://michaelpollmeier.com"))
   )
 ))
+```
+
+### initial version tag
+If you don't have any previous versions tagged in git, do so manually now (only one initial tag necessary). N.b. other versioning schemes like `v1`, `v0.1`, `v0.0.0.1` will work as well. 
+```
+git tag v0.0.1
 ```
 
 ### gpg keys
