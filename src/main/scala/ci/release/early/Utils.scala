@@ -10,12 +10,11 @@ import versionsort.VersionHelper
 
 object Utils {
 
-  def determineAndTagTargetVersion: String = {
+  def determineTargetVersion: String = {
     val allTags = git.tagList.call.asScala.map(_.getName).toList
     val highestVersion = findHighestVersion(allTags)
     println(s"highest version so far: $highestVersion")
     val targetVersion = incrementVersion(highestVersion)
-    tagAndPush(s"v$targetVersion")
     targetVersion
   }
 
@@ -42,9 +41,13 @@ object Utils {
     (segments.dropRight(1) :+ incremented).mkString(".")
   }
 
-  def tagAndPush(tagName: String): Unit = {
+  def tag(tagName: String): Unit = {
     println(s"tagging as $tagName")
     git.tag.setName(tagName).call
+  }
+
+  def push(tagName: String): Unit = {
+    println(s"pushing tag $tagName")
 
     /* couldn't get jgit to push it to the remote... falling back to installed version of git
      * jgit error: `There are not any available sig algorithm`... no idea */

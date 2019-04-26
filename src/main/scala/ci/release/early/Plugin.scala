@@ -26,23 +26,35 @@ object Plugin extends AutoPlugin {
     commands += Command.command("ci-release") { state =>
       println("Running ci-release")
       verifyGitIsClean 
-      val targetVersion = determineAndTagTargetVersion
+      val targetVersion = determineTargetVersion
+      val tagName = s"v$targetVersion"
+      tag(tagName)
+      def pushAndReturnState = {
+        push(tagName)
+        state
+      }
       s"""set ThisBuild/version := "$targetVersion"""" ::
         "verifyNoSnapshotDependencies" ::
         "+publish" ::
-        state
+        pushAndReturnState
     },
     commands += Command.command("ci-release-sonatype") { state =>
       println("Running ci-release-sonatype")
       verifyGitIsClean 
       assert(pgpPassphrase.value.isDefined,
         "please specify PGP_PASSPHRASE as an environment variable (e.g. `export PGP_PASSPHRASE='secret')")
-      val targetVersion = determineAndTagTargetVersion
+      val targetVersion = determineTargetVersion
+      val tagName = s"v$targetVersion"
+      tag(tagName)
+      def pushAndReturnState = {
+        push(tagName)
+        state
+      }
       s"""set ThisBuild/version := "$targetVersion"""" ::
         "verifyNoSnapshotDependencies" ::
         "+publishSigned" ::
         "sonatypeReleaseAll" ::
-        state
+        pushAndReturnState
     }
   )
 
