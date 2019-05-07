@@ -50,7 +50,7 @@ object Plugin extends AutoPlugin {
         push(tagName)
         state
       }
-      s"set ThisBuild/version := \"$targetVersion\"" ::
+      s"""set ThisBuild/version := "$targetVersion"""" ::
         "verifyNoSnapshotDependencies" ::
         "sonatypeOpen \"unimportant\"" ::
         "+publishSigned" ::
