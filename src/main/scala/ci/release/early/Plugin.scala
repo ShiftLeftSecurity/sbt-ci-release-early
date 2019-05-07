@@ -52,8 +52,9 @@ object Plugin extends AutoPlugin {
       }
       s"""set ThisBuild/version := "$targetVersion"""" ::
         "verifyNoSnapshotDependencies" ::
+        "sonatypeOpen" ::
         "+publishSigned" ::
-        "sonatypeReleaseAll" ::
+        "sonatypeRelease" ::
         pushAndReturnState
     }
   )
