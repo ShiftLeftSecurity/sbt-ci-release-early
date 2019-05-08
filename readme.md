@@ -30,7 +30,7 @@ Sbt plugin for fully automated releases, without SNAPSHOT and git sha's in the v
 
 Add the dependency in your `projects/plugins.sbt`:
 ```
-addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "1.0.17")
+addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "1.0.18")
 ```
 Latest version: [![Scaladex](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)
 
@@ -45,7 +45,7 @@ If you don't have any previous versions tagged in git, do so manually now (only 
 git tag v0.0.1
 ```
 
-Then just run `ci-release` - you can first try this locally, and then as part of your build pipeline:
+Then just run `ci-release` - you can first try this locally, and then as part of your build pipeline. Cross builds (for multiple scala versions) are supported. 
 ```
 sbt ci-release
 ```
@@ -151,7 +151,7 @@ And define the following secret variables. They are shared with travis, but cann
 Now configure your `.travis.yml`. There are many ways to do this, but to make things simple you can just copy paste the following into your `.travis.yml`. It sets up your build in two stages:
 
 * `test`: always run `sbt +test`
-* `release`: if it's the `master` branch and all tests passed, run `sbt ci-release-sonatype`
+* `release`: if it's the `master` branch and all tests passed, run `sbt ci-release-sonatype`. Note: use `ci-cross-release-sonatype` if you want to release your project for all defined cross scala versions. This is not the default because it relies on `sonatypeReleaseAll`, which fails if there's previous inconsistent staging repositories (e.g. if a previous release timed out). 
 
 ```yml
 language: scala
@@ -167,7 +167,7 @@ install:
 stages:
 - name: test
 - name: release
-  if: branch = master
+  if: branch = master AND type = push
 
 jobs:
   include:

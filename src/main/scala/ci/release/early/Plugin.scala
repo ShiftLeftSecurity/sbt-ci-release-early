@@ -12,9 +12,9 @@ import xerial.sbt.Sonatype.SonatypeCommand.sonatypeReleaseAll
 object Plugin extends AutoPlugin {
   object autoImport {
     val verifyNoSnapshotDependencies = taskKey[Unit]("Verify there are no snapshot dependencies (fail otherwise)")
+    // val currentTag = settingKey[String]("tag for this version")
   }
   import autoImport._
-  import Utils._
 
   override def globalSettings: Seq[Def.Setting[_]] = List(
     publishArtifact.in(Test) := false,
@@ -24,38 +24,43 @@ object Plugin extends AutoPlugin {
      * - didn't figure out how to automatically cross-build without lot's of extra code
     */
     commands += Command.command("ci-release") { state =>
-      println("Running ci-release")
-      verifyGitIsClean 
-      val targetVersion = determineTargetVersion
-      val tagName = s"v$targetVersion"
-      tag(tagName)
-      def pushAndReturnState = {
-        push(tagName)
-        state
-      }
-      s"""set ThisBuild/version := "$targetVersion"""" ::
+      println("Running ci-release (cross scala versions)")
+      val versionAndTag = Utils.determineAndTagTargetVersion
+      // TODO push *after* release is complete
+      Utils.push(versionAndTag.tag)
+      s"""set ThisBuild/version := "${versionAndTag.version}"""" ::
         "verifyNoSnapshotDependencies" ::
         "+publish" ::
-        pushAndReturnState
+        state
     },
     commands += Command.command("ci-release-sonatype") { state =>
-      println("Running ci-release-sonatype")
-      verifyGitIsClean 
+      println("Running ci-release-sonatype (non-cross-scala versions)")
       assert(pgpPassphrase.value.isDefined,
         "please specify PGP_PASSPHRASE as an environment variable (e.g. `export PGP_PASSPHRASE='secret')")
-      val targetVersion = determineTargetVersion
-      val tagName = s"v$targetVersion"
-      tag(tagName)
-      def pushAndReturnState = {
-        push(tagName)
-        state
-      }
-      s"""set ThisBuild/version := "$targetVersion"""" ::
+      val versionAndTag = Utils.determineAndTagTargetVersion
+      // TODO push *after* release is complete
+      Utils.push(versionAndTag.tag)
+      s"""set ThisBuild/version := "${versionAndTag.version}"""" ::
         "verifyNoSnapshotDependencies" ::
-        "sonatypeOpen \"unimportant\"" ::
-        "+publishSigned" ::
+        "sonatypeOpen \"sbt-ci-release-early\"" ::
+        "publishSigned" ::
         "sonatypeRelease" ::
-        pushAndReturnState
+        state
+    },
+    commands += Command.command("ci-cross-release-sonatype") { state =>
+      println("Running ci-release-sonatype (cross-scala versions)")
+      println("note: only use this mode if you actually have a cross build for multiple scala versions. it uses `sonatypeReleaseAll` which will fail if any previous staging repo had any problems (e.g. timeout during release)")
+      assert(pgpPassphrase.value.isDefined,
+        "please specify PGP_PASSPHRASE as an environment variable (e.g. `export PGP_PASSPHRASE='secret')")
+      val versionAndTag = Utils.determineAndTagTargetVersion
+      // TODO push *after* release is complete
+      Utils.push(versionAndTag.tag)
+      s"""set ThisBuild/version := "${versionAndTag.version}"""" ::
+        "verifyNoSnapshotDependencies" ::
+        "sonatypeOpen \"sbt-ci-release-early cross\"" :: //sets `sonatypeStagingRepositoryProfile`
+        "+publishSigned" :: //discards `sonatypeStagingRepositoryProfile` :(
+        "sonatypeReleaseAll" :: //fails if there's previous inconsistent staging repos
+        state
     }
   )
 
@@ -64,6 +69,7 @@ object Plugin extends AutoPlugin {
 
   override lazy val projectSettings = Seq(
     verifyNoSnapshotDependencies := verifyNoSnapshotDependenciesTask.value
+    // currentTag := currentTag.value
   )
 
   override def buildSettings: Seq[Def.Setting[_]] = List(

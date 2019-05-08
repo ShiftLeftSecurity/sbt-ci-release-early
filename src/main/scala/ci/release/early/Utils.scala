@@ -8,7 +8,17 @@ import scala.util.Try
 import sys.process._
 import versionsort.VersionHelper
 
+case class VersionAndTag(version: String, tag: String)
+
 object Utils {
+
+  def determineAndTagTargetVersion: VersionAndTag = {
+    verifyGitIsClean
+    val targetVersion = Utils.determineTargetVersion
+    val tagName = s"v$targetVersion"
+    tag(tagName)
+    VersionAndTag(targetVersion, tagName)
+  }
 
   def determineTargetVersion: String = {
     val allTags = git.tagList.call.asScala.map(_.getName).toList
