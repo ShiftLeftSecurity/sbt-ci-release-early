@@ -155,7 +155,7 @@ Now configure your `.travis.yml`. There are many ways to do this, but to make th
 
 ```yml
 language: scala
-jdk: oraclejdk8
+jdk: openjdk8
 
 before_install:
 - git fetch --tags
