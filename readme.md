@@ -17,9 +17,10 @@ Sbt plugin for fully automated releases, without SNAPSHOT and git sha's in the v
 
 ## Features
 * detects last version from git (e.g. `v1.0.0`) and increments the last digit, i.e. the next release is automatically inferred as `v1.0.1`
-* no more git hashes in the released version
 * no more need to manually tag the builds
-* builds the release, creates and pushes the git tag, publishes the artifact
+* builds the release, creates a local git tag, publishes the artifact, publishes the git tag
+* automatically performs a cross-release if your build has multiple scala versions configured
+* uses sbt-sonatype's fast new `sonatypeBundleRelease`
 * `ci-release` for your in-house setup (e.g. jenkins/artifactory/nexus etc), very easy to configure
 * `ci-release-sonatype` for your open source travis/sonatype/maven central setup, a little more involved to configure
 * easy to test locally (faster turnaround than debugging on travis.ci)
@@ -30,7 +31,7 @@ Sbt plugin for fully automated releases, without SNAPSHOT and git sha's in the v
 
 Add the dependency in your `projects/plugins.sbt`:
 ```
-addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "1.0.18")
+addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "1.0.23")
 ```
 Latest version: [![Scaladex](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)
 
@@ -252,10 +253,9 @@ skip in publish := true
 If the build defines a dependency on the subproject (e.g. `dependsOn(subProjectName)`) then it's automatically included in the release. 
 Otherwise you can just append `subProjectName/publish` to your build pipeline, the version is already set for you :)
 
-### Can I depend on Maven Central releases immediately?
+### Can I use my releases immediately?
 
-Yes! As soon as CI "closes" the staging repository you can depend on those
-artifacts with
+Yes. As soon as CI "closes" the staging repository they are available on sonatype/releases and will be synchronized to maven central within ~10mins. If you can't wait so long, add a sonatype resolver:
 
 ```scala
 resolvers += Resolver.sonatypeRepo("releases")
@@ -263,8 +263,8 @@ resolvers += Resolver.sonatypeRepo("releases")
 
 ### Can I publish sbt plugins?
 
-You can publish sbt plugins to Maven Central like a normal library, no custom
-setup required. In fact, this plugin is published with a previous version of itself :)
+You can publish sbt plugins like a normal library, no custom setup required.
+In fact, this plugin is published with a previous version of itself :)
 
 ## Alternatives
 

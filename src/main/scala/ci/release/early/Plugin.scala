@@ -25,11 +25,10 @@ object Plugin extends AutoPlugin {
     commands += Command.command("ci-release") { state =>
       println("Running ci-release (cross scala versions)")
       val versionAndTag = Utils.determineAndTagTargetVersion
-      // TODO push *after* release is complete
-      Utils.push(versionAndTag.tag)
       s"""set ThisBuild/version := "${versionAndTag.version}"""" ::
         "verifyNoSnapshotDependencies" ::
         "+publish" ::
+        s"git-push-tag ${versionAndTag.tag}" ::
         state
     },
     commands += Command.command("ci-release-sonatype") { state =>
@@ -37,13 +36,17 @@ object Plugin extends AutoPlugin {
       assert(pgpPassphrase.value.isDefined,
         "please specify PGP_PASSPHRASE as an environment variable (e.g. `export PGP_PASSPHRASE='secret')")
       val versionAndTag = Utils.determineAndTagTargetVersion
-      // TODO push the git tag *after* a successful release, not before
-      Utils.push(versionAndTag.tag)
       s"""set ThisBuild/version := "${versionAndTag.version}"""" ::
         "verifyNoSnapshotDependencies" ::
         "+publishSigned" ::
         "sonatypeBundleRelease" ::
+        s"git-push-tag ${versionAndTag.tag}" ::
         state
+    },
+    commands += Command.single("git-push-tag") { (state, tag) =>
+      Utils.push(tag)
+      println(s"pushed git tag $tag to origin")
+      state
     },
   )
 
