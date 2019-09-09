@@ -7,7 +7,6 @@ import sbt._
 import sbt.Keys._
 import xerial.sbt.Sonatype
 import xerial.sbt.Sonatype.autoImport._
-import xerial.sbt.Sonatype.SonatypeCommand.sonatypeReleaseAll
 
 object Plugin extends AutoPlugin {
   object autoImport {
@@ -34,34 +33,18 @@ object Plugin extends AutoPlugin {
         state
     },
     commands += Command.command("ci-release-sonatype") { state =>
-      println("Running ci-release-sonatype (non-cross-scala versions)")
+      println("Running ci-release-sonatype")
       assert(pgpPassphrase.value.isDefined,
         "please specify PGP_PASSPHRASE as an environment variable (e.g. `export PGP_PASSPHRASE='secret')")
       val versionAndTag = Utils.determineAndTagTargetVersion
-      // TODO push *after* release is complete
+      // TODO push the git tag *after* a successful release, not before
       Utils.push(versionAndTag.tag)
       s"""set ThisBuild/version := "${versionAndTag.version}"""" ::
         "verifyNoSnapshotDependencies" ::
-        "sonatypeOpen \"sbt-ci-release-early\"" ::
-        "publishSigned" ::
-        "sonatypeRelease" ::
+        "+publishSigned" ::
+        "sonatypeBundleRelease" ::
         state
     },
-    commands += Command.command("ci-cross-release-sonatype") { state =>
-      println("Running ci-release-sonatype (cross-scala versions)")
-      println("note: only use this mode if you actually have a cross build for multiple scala versions. it uses `sonatypeReleaseAll` which will fail if any previous staging repo had any problems (e.g. timeout during release)")
-      assert(pgpPassphrase.value.isDefined,
-        "please specify PGP_PASSPHRASE as an environment variable (e.g. `export PGP_PASSPHRASE='secret')")
-      val versionAndTag = Utils.determineAndTagTargetVersion
-      // TODO push *after* release is complete
-      Utils.push(versionAndTag.tag)
-      s"""set ThisBuild/version := "${versionAndTag.version}"""" ::
-        "verifyNoSnapshotDependencies" ::
-        "sonatypeOpen \"sbt-ci-release-early cross\"" :: //sets `sonatypeStagingRepositoryProfile`
-        "+publishSigned" :: //discards `sonatypeStagingRepositoryProfile` :(
-        "sonatypeReleaseAll" :: //fails if there's previous inconsistent staging repos
-        state
-    }
   )
 
   override def requires = SbtPgp && Sonatype

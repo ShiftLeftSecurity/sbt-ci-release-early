@@ -66,7 +66,7 @@ Ensure the following settings *are* defined in your `build.sbt`:
 - `licenses`
 - `developers`
 - `scmInfo`
-- `publishTo`: e.g. `sonatypePublishTo.value`
+- `publishTo`: e.g. `sonatypePublishToBundle.value`
 
 Example: https://github.com/mpollmeier/sbt-ci-release-early-usage/blob/master/build.sbt
 
@@ -74,7 +74,7 @@ Example for a multi-project build:
 ```scala
 inThisBuild(List(
   organization := "io.shiftleft",
-  publishTo := sonatypePublishTo.value,
+  publishTo := sonatypePublishToBundle.value,
   licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
   homepage := Some(url("https://github.com/mpollmeier/sbt-ci-release")),
   scmInfo := Some(ScmInfo(
@@ -151,7 +151,7 @@ And define the following secret variables. They are shared with travis, but cann
 Now configure your `.travis.yml`. There are many ways to do this, but to make things simple you can just copy paste the following into your `.travis.yml`. It sets up your build in two stages:
 
 * `test`: always run `sbt +test`
-* `release`: if it's the `master` branch and all tests passed, run `sbt ci-release-sonatype`. Note: use `ci-cross-release-sonatype` if you want to release your project for all defined cross scala versions. This is not the default because it relies on `sonatypeReleaseAll`, which fails if there's previous inconsistent staging repositories (e.g. if a previous release timed out). 
+* `release`: if it's the `master` branch and all tests passed, run `sbt ci-release-sonatype`
 
 ```yml
 language: scala
@@ -232,7 +232,7 @@ If you want to release a specific version you have to do that yourself:
 // in sbt:
 set version := "1.2.3"
 +publishSigned
-sonatypeReleaseAll
+sonatypeBundleRelease
 
 // on the terminal:
 git tag v1.2.3
