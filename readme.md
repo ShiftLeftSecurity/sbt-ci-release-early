@@ -102,7 +102,7 @@ gpg --gen-key
 
 - For real name, use "$PROJECT_NAME bot", e.g. `gremlin-scala bot`
 - For email, use your own email address
-- For passphrase, generate a random password
+- For passphrase, generate a random password, e.g. using `apg -n1 -m20 -Mncl`
 
 At the end you'll see output like this
 
@@ -126,11 +126,14 @@ Now submit the public key to a keyserver (shouldn't matter which one, keyservers
 gpg --send-keys $LONG_ID
 ```
 
-Then export the private key locally so we can later encrypt it for travis. Make sure you don't publish this anywhere. The actual damage is small since it's just for this project, but people will laugh at you :)
+Then export the keys locally so we can later encrypt the private one for travis. Make sure you don't publish the private key anywhere. The actual damage is small since it's just for this build, but people will laugh at you :)
 
 ```
+gpg --armor --export $LONG_ID > public-key.pem
 gpg --armor --export-secret-keys $LONG_ID > private-key.pem
 echo "\nprivate-key.pem" >> .gitignore
+git add .gitignore public-key.pem
+git commit
 ```
 
 ### Git push access
@@ -162,6 +165,7 @@ before_install:
 - git fetch --tags
 
 install:
+- gpg --import public-key.pem
 - gpg --import private-key.pem
 - gpg --list-keys
 
@@ -196,7 +200,7 @@ Finally, share the private key with travis. Note that this has to be run from wi
 travis encrypt-file private-key.pem --add
 ```
 
-That's all - give it a try. 
+That's all - give it a try. Remember to add `private-key.pem.enc` to your repository, but *not* `private-key.pem`.
 
 ## Dependencies
 By installing `sbt-ci-release-early` the following sbt plugins are also brought in:

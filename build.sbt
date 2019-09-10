@@ -10,7 +10,7 @@ libraryDependencies ++= List(
   "org.scalatest" %% "scalatest" % "3.0.8" % Test
 )
 addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.6")
-addSbtPlugin("com.jsuereth" % "sbt-pgp" % "2.0.0-M2")
+addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.1.1")
 
 homepage := Some(url("https://github.com/ShiftLeftSecurity/sbt-ci-release-early"))
 scmInfo := Some(ScmInfo(
