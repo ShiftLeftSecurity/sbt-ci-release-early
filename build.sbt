@@ -33,4 +33,5 @@ developers := List(
 )
 resolvers += Resolver.sonatypeRepo("releases")
 
+useGpg := false
 publishTo := sonatypePublishTo.value
