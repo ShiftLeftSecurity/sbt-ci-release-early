@@ -68,6 +68,7 @@ Ensure the following settings *are* defined in your `build.sbt`:
 - `developers`
 - `scmInfo`
 - `publishTo`: e.g. `sonatypePublishToBundle.value`
+- `useGpg := false`: to use the sbt-pgp bouncycastle signer. The default recently changed to use the command line gpg, which fails on some travis.ci distributions
 
 Example: https://github.com/mpollmeier/sbt-ci-release-early-usage/blob/master/build.sbt
 
