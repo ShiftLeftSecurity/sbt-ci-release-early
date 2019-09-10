@@ -1,3 +1,5 @@
-addSbtPlugin("io.get-coursier" % "sbt-coursier" % "1.1.0-M13")
-addSbtPlugin("io.get-coursier" % "sbt-shading" % "1.1.0-M13")
-addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "1.0.22")
+// addSbtPlugin("io.get-coursier" % "sbt-coursier" % "1.1.0-M13")
+// addSbtPlugin("io.get-coursier" % "sbt-shading" % "1.1.0-M13")
+// addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "1.0.22")
+addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.6")
+addSbtPlugin("com.jsuereth" % "sbt-pgp" % "2.0.0-M2")
