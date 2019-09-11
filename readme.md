@@ -121,9 +121,19 @@ below. The ID will look something like
 export LONG_ID=6E8ED79B03AD527F1B281169D28FC818985732D9
 ```
 
-Now submit the public key to a keyserver (shouldn't matter which one, keyservers synchronize their keys with each other):
+Optional: if you would like to change the key expiry date:
+```bash
+gpg --edit-key $LONG_ID
+expire #follow prompt
+key 1
+expire #follow prompt
+save
+```
+
+Now have one final look and submit the public key to a keyserver (shouldn't matter which one, keyservers synchronize their keys with each other):
 
 ```
+gpg --list-keys $LONG_ID
 gpg --send-keys $LONG_ID
 ```
 
@@ -134,7 +144,6 @@ gpg --armor --export $LONG_ID > public-key.pem
 gpg --armor --export-secret-keys $LONG_ID > private-key.pem
 echo "\nprivate-key.pem" >> .gitignore
 git add .gitignore public-key.pem
-git commit
 ```
 
 ### Git push access
