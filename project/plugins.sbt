@@ -1,1 +1,1 @@
-addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "1.1.4")
+addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "1.1.5")
