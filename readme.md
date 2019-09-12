@@ -74,18 +74,16 @@ Example: https://github.com/mpollmeier/sbt-ci-release-early-usage/blob/master/bu
 
 Example for a multi-project build:
 ```scala
-inThisBuild(List(
-  organization := "io.shiftleft",
-  publishTo := sonatypePublishToBundle.value,
-  licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
-  homepage := Some(url("https://github.com/mpollmeier/sbt-ci-release")),
-  scmInfo := Some(ScmInfo(
-      url("https://github.com/mpollmeier/sbt-ci-release-usage"),
-      "scm:git@github.com:mpollmeier/sbt-ci-release-usage.git")),
-  developers := List(
-    Developer("mpollmeier", "Michael Pollmeier", "michael@michaelpollmeier.com", url("https://michaelpollmeier.com"))
-  )
-))
+ThisBuild/organization := "io.shiftleft"
+ThisBuild/licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
+ThisBuild/homepage := Some(url("https://github.com/mpollmeier/sbt-ci-release"))
+ThisBuild/scmInfo := Some(ScmInfo(
+    url("https://github.com/mpollmeier/sbt-ci-release-usage"),
+    "scm:git@github.com:mpollmeier/sbt-ci-release-usage.git"))
+ThisBuild/developers := List(
+  Developer("mpollmeier", "Michael Pollmeier", "michael@michaelpollmeier.com", url("https://michaelpollmeier.com")))
+ThisBuild/publishTo := sonatypePublishToBundle.value
+useGpg := false // must not be defined for `ThisBuild`... `show pgpSigner` should show `BC-PGP`
 ```
 
 ### initial version tag
