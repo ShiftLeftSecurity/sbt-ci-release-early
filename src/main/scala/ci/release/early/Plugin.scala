@@ -1,8 +1,7 @@
 package ci.release.early
 
-import com.typesafe.sbt.SbtPgp
-import com.typesafe.sbt.SbtPgp.autoImport._
-import com.typesafe.sbt.pgp.PgpKeys.publishSigned
+import com.jsuereth.sbtpgp.SbtPgp
+import com.jsuereth.sbtpgp.SbtPgp.autoImport._
 import sbt._
 import sbt.Keys._
 import xerial.sbt.Sonatype
