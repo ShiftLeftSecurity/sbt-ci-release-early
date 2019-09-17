@@ -68,7 +68,7 @@ Ensure the following settings *are* defined in your `build.sbt`:
 - `developers`
 - `scmInfo`
 - `publishTo := sonatypePublishToBundle.value`
-- `useGpg := false`: to use the sbt-pgp bouncycastle signer. The default recently changed to use the command line gpg, which fails on some travis.ci distributions
+- `Global/useGpgPinentry := true`: to ensure we're using `gpg --pinentry-mode loopback` - otherwise the sbt prompt asks for the key password, which will timeout on travis.ci
 
 Example: https://github.com/mpollmeier/sbt-ci-release-early-usage/blob/master/build.sbt
 
@@ -83,7 +83,7 @@ ThisBuild/scmInfo := Some(ScmInfo(
 ThisBuild/developers := List(
   Developer("mpollmeier", "Michael Pollmeier", "michael@michaelpollmeier.com", url("https://michaelpollmeier.com")))
 ThisBuild/publishTo := sonatypePublishToBundle.value
-useGpg := false // must not be defined for `ThisBuild`... `show pgpSigner` should show `BC-PGP`
+Global/useGpgPinentry := true // to ensure we're using `--pinentry-mode loopback`
 ```
 
 ### initial version tag
@@ -166,9 +166,9 @@ Now configure your `.travis.yml`. There are many ways to do this, but to make th
 * `release`: if it's the `master` branch and all tests passed, run `sbt ci-release-sonatype`
 
 ```yml
-dist: xenial
+dist: bionic
 language: scala
-jdk: openjdk8
+jdk: openjdk10
 if: tag IS blank
 
 before_install:
