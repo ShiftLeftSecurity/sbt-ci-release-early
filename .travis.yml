@@ -1,5 +1,5 @@
-dist: xenial
-jdk: openjdk8
+dist: bionic
+jdk: openjdk10
 language: scala
 if: tag IS blank
 
