@@ -68,7 +68,7 @@ Ensure the following settings *are* defined in your `build.sbt`:
 - `developers`
 - `scmInfo`
 - `publishTo := sonatypePublishToBundle.value`
-- `Global/useGpgPinentry := true`: to ensure we're using `gpg --pinentry-mode loopback` - otherwise the sbt prompt asks for the key password, which will timeout on travis.ci
+- `Global/useGpgPinentry := true`: to ensure we're using `gpg --pinentry-mode loopback` - otherwise the sbt prompt asks for the key password, which will timeout on travis.ci. Note that this is required for gpg2. Do not configure if you use an older version (e.g. gpg1 shipped with `dist: xenial`).
 
 Example: https://github.com/mpollmeier/sbt-ci-release-early-usage/blob/master/build.sbt
 
