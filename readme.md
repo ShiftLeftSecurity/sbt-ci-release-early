@@ -167,7 +167,7 @@ Now configure your `.travis.yml`. There are many ways to do this, but to make th
 ```yml
 dist: bionic
 language: scala
-jdk: openjdk10
+jdk: openjdk11
 if: tag IS blank
 
 before_install:
