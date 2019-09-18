@@ -135,13 +135,12 @@ gpg --list-keys $LONG_ID
 gpg --send-keys $LONG_ID
 ```
 
-Then export the keys locally so we can later encrypt the private one for travis. Make sure you don't publish the private key anywhere. The actual damage is small since it's just for this build, but people will laugh at you :)
+Then export the private key locally so we can later encrypt the private one for travis. Make sure you don't publish it anywhere. The actual damage is small since it's just for this build, but the internet will shame you.
 
 ```
-gpg --armor --export $LONG_ID > public-key.pem
 gpg --armor --export-secret-keys $LONG_ID > private-key.pem
 echo "\nprivate-key.pem" >> .gitignore
-git add .gitignore public-key.pem
+git add .gitignore
 ```
 
 ### Git push access
@@ -175,9 +174,7 @@ before_install:
 - git fetch --tags
 
 install:
-- gpg --import public-key.pem
 - gpg --import private-key.pem
-- gpg --list-keys
 
 stages:
 - name: test
