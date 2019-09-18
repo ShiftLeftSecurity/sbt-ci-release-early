@@ -216,6 +216,11 @@ By installing `sbt-ci-release-early` the following sbt plugins are also brought 
 
 ## FAQ
 
+### jdk8
+If you want to use jdk8 (which is end of life), you need to make the following changes:
+* .travis.yml: `dist: xenial`,`jdk: openjdk8`
+* build.sbt: `Global/useGpgPinentry := false`, `Global/useGpg := false`
+
 ### How can determine the latest released version?
 
 Other than manually looking at sonatype/maven central or git tags, you can use the following snippet that remotely gets the git tags that start with `v` and have (in this version) three decimals separated by `.`, and returns the highest version. 
