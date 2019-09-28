@@ -5,7 +5,6 @@
 
 Sbt plugin for fully automated releases, without SNAPSHOT and git sha's in the version. A remix of the best ideas from [sbt-ci-release](https://github.com/olafurpg/sbt-ci-release) and [sbt-release-early](https://github.com/scalacenter/sbt-release-early/).
 
-## TOC
 - [Features](#features)
 - [Installation](#installation)
 - [In-house setup (e.g. jenkins/artifactory)](#in-house-setup-eg-jenkinsartifactory)
