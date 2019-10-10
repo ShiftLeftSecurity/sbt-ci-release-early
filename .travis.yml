@@ -20,7 +20,7 @@ jobs:
   - stage: test
     script: sbt +test
   - stage: release
-    script: sbt "set ThisBuild/version := \"1.1.13\"" publishSigned sonatypeBundleRelease
+    script: sbt \"set ThisBuild/version := \"1.1.13\"\" publishSigned sonatypeBundleRelease
     #  - stage: release
     #script: sbt ci-release-sonatype
 
