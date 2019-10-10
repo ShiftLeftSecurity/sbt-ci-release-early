@@ -20,7 +20,9 @@ jobs:
   - stage: test
     script: sbt +test
   - stage: release
-    script: sbt ci-release-sonatype
+    script: sbt \"set ThisBuild/version := \"1.1.13\"\" publishSigned sonatypeBundleRelease
+    #  - stage: release
+    #script: sbt ci-release-sonatype
 
 before_cache:
 - find $HOME/.sbt -name "*.lock" -type f -delete
