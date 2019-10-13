@@ -12,31 +12,31 @@ case class VersionAndTag(version: String, tag: String)
 
 object Utils {
 
-  def determineAndTagTargetVersion: VersionAndTag = {
+  def determineAndTagTargetVersion(log: String => Any): VersionAndTag = {
     verifyGitIsClean
-    val targetVersion = Utils.determineTargetVersion
+    val targetVersion = Utils.determineTargetVersion(log)
     val tagName = s"v$targetVersion"
-    tag(tagName)
+    tag(tagName, log)
     VersionAndTag(targetVersion, tagName)
   }
 
-  def determineTargetVersion: String = {
+  def determineTargetVersion(log: String => Any): String = {
     val allTags = git.tagList.call.asScala.map(_.getName).toList
-    val highestVersion = findHighestVersion(allTags)
-    println(s"highest version so far: $highestVersion")
+    val highestVersion = findHighestVersion(allTags, log)
+    log(s"highest version so far: $highestVersion")
     val targetVersion = incrementVersion(highestVersion)
     targetVersion
   }
 
   /** based on git tags, derive the highest version */
-  def findHighestVersion(tags: List[String]): String = {
+  def findHighestVersion(tags: List[String], log: String => Any): String = {
     val taggedVersions = tags.collect {
       case gitTagVersionRegex(version) => version
     }
 
     if (taggedVersions.isEmpty) {
       val defaultVersion = "0.1.0"
-      println(s"no tagged versions found in git, starting with $defaultVersion")
+      log(s"no tagged versions found in git, starting with $defaultVersion")
       defaultVersion
     } else {
       taggedVersions.sortWith { VersionHelper.compare(_, _) > 0 }.head
@@ -51,25 +51,23 @@ object Utils {
     (segments.dropRight(1) :+ incremented).mkString(".")
   }
 
-  def tag(tagName: String): Unit = {
-    println(s"tagging as $tagName")
+  def tag(tagName: String, log: String => Any): Unit = {
+    log(s"tagging as $tagName")
     git.tag.setName(tagName).call
   }
 
-  def push(tagName: String): Unit = {
-    println(s"pushing tag $tagName")
-
+  def push(tagName: String, log: String => Any): Unit = {
     /* couldn't get jgit to push it to the remote... falling back to installed version of git
      * jgit error: `There are not any available sig algorithm`... no idea */
     val remoteUri: String = {
       val remotes = git.remoteList.call
       assert(remotes.size == 1, "we currently only support repos that have _one_ remote configured, sorry")
       val uri = remotes.get(0).getURIs.get(0).toString
-      println(s"pushing tag to uri=$uri")
+      log(s"pushing $tagName to $uri")
       Option(System.getenv("GITHUB_TOKEN")) match {
         case None => uri
         case Some(token) =>
-          println(s"env var GITHUB_TOKEN found, trying to interweave it with the remote uri ($uri)")
+          log(s"env var GITHUB_TOKEN found, trying to interweave it with the remote uri ($uri)")
           interweaveGithubToken(token, uri).get
       }
     }
