@@ -20,8 +20,8 @@ Sbt plugin for fully automated releases, without SNAPSHOT and git sha's in the v
 * builds the release, creates a local git tag, publishes the artifact, publishes the git tag
 * automatically performs a cross-release if your build has multiple scala versions configured
 * uses sbt-sonatype's fast new `sonatypeBundleRelease`
-* `ci-release` for your in-house setup (e.g. jenkins/artifactory/nexus etc), very easy to configure
-* `ci-release-sonatype` for your open source travis/sonatype/maven central setup, a little more involved to configure
+* use `ciRelease` for your in-house setup (e.g. jenkins/artifactory/nexus etc), very easy to configure
+* use `ciReleaseSonatype` for your open source travis/sonatype/maven central setup, a little more involved to configure
 * easy to test locally (faster turnaround than debugging on travis.ci)
 * automatically handles cross release for multiple scala versions
 * verifies that your build does not depend on any snapshot dependencies
@@ -30,9 +30,15 @@ Sbt plugin for fully automated releases, without SNAPSHOT and git sha's in the v
 
 Add the dependency in your `projects/plugins.sbt`:
 ```
-addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "1.0.23")
+addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "1.1.13")
 ```
+
 Latest version: [![Scaladex](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)
+
+Enable sbt-git (brought in as a plugin dependency) in your `build.sbt`:
+```
+enablePlugins(GitVersioning)
+```
 
 ## In-house setup (e.g. jenkins/artifactory)
 Make sure the typical `publishTo` variable in your `built.sbt` points to your repository (this isn't specific to this plugin). Example in `build.sbt`:
@@ -40,17 +46,30 @@ Make sure the typical `publishTo` variable in your `built.sbt` points to your re
 ThisBuild / publishTo := Some("releases" at "https://shiftleft.jfrog.io/shiftleft/libs-release-local")
 ```
 
-If you don't have any previous versions tagged in git, do so manually now (only one initial tag necessary). N.b. other versioning schemes like `v1`, `v0.1`, `v0.0.0.1` will work as well. 
+If you don't have any previous versions tagged in git, now is the time to choose your versioning scheme. To do so simply tag your current commit with the version you want: 
 ```
 git tag v0.0.1
 ```
+N.b. other versioning schemes like `v1`, `v0.1`, `v0.0.0.1` will work as well. 
 
-Then just run `ci-release` - you can first try this locally, and then as part of your build pipeline. Cross builds (for multiple scala versions) are supported. 
+To double check that the auto-tagging works, let the plugin create a new version tag for you:
 ```
-sbt ci-release
+sbt ciReleaseTagNextVersion
 ```
 
-## Public build (e.g. travis.ci/sonatype)
+Now let's try to publish a release from your local machine:
+```
+sbt ciRelease
+```
+
+If that all worked, just configure the two commands `ciReleaseTagNextVersion ciRelease` at the end of your build pipeline on your CI server. A complete command would e.g. be:
+```
+sbt clean test ciReleaseTagNextVersion ciRelease
+```
+
+Cross builds (for multiple scala versions) work seamlessly (the plugin just calls `+publishSigned`). 
+
+## Sonatype / maven central (e.g. via travis.ci)
 Public repositories like Sonatype (which syncs to maven central) typically impose additional constraints on the published artifacts, so the setup becomes a little more involved. These steps assume you're using travis.ci, but it should be similar on other build servers. 
 
 ### Sonatype account
@@ -61,6 +80,7 @@ Make sure `build.sbt` *does not* define any of the following settings
 - `version`
 
 Ensure the following settings *are* defined in your `build.sbt`:
+- `enablePlugins(GitVersioning)`: enable sbt-git (automatically brought in as a plugin dependency)
 - `name`
 - `organization`: must match your sonatype account priviledges
 - `licenses`
@@ -73,6 +93,7 @@ Example: https://github.com/mpollmeier/sbt-ci-release-early-usage/blob/master/bu
 
 Example for a multi-project build:
 ```scala
+enablePlugins(GitVersioning)
 ThisBuild/organization := "io.shiftleft"
 ThisBuild/licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
 ThisBuild/homepage := Some(url("https://github.com/mpollmeier/sbt-ci-release"))
@@ -86,9 +107,15 @@ Global/useGpgPinentry := true // to ensure we're using `--pinentry-mode loopback
 ```
 
 ### initial version tag
-If you don't have any previous versions tagged in git, do so manually now (only one initial tag necessary). N.b. other versioning schemes like `v1`, `v0.1`, `v0.0.0.1` will work as well. 
+If you don't have any previous versions tagged in git, now is the time to choose your versioning scheme. To do so simply tag your current commit with the version you want: 
 ```
 git tag v0.0.1
+```
+N.b. other versioning schemes like `v1`, `v0.1`, `v0.0.0.1` will work as well. 
+
+To double check that the auto-tagging works, let the plugin create a new version tag for you:
+```
+sbt ciReleaseTagNextVersion
 ```
 
 ### gpg keys
@@ -161,7 +188,7 @@ And define the following secret variables. They are shared with travis, but cann
 Now configure your `.travis.yml`. There are many ways to do this, but to make things simple you can just copy paste the following into your `.travis.yml`. It sets up your build in two stages:
 
 * `test`: always run `sbt +test`
-* `release`: if it's the `master` branch and all tests passed, run `sbt ci-release-sonatype`
+* `release`: if it's the `master` branch and all tests passed, run `sbt ciReleaseTagNextVersion ciReleaseSonatype`
 
 ```yml
 dist: bionic
@@ -185,7 +212,7 @@ jobs:
     - stage: test
       script: sbt +test
     - stage: release
-      script: sbt ci-release-sonatype
+      script: sbt ciReleaseTagNextVersion ciReleaseSonatype
 
 before_cache:
 - find $HOME/.sbt -name "*.lock" -type f -delete
@@ -210,10 +237,20 @@ That's all - give it a try. Remember to add `private-key.pem.enc` to your reposi
 
 ## Dependencies
 By installing `sbt-ci-release-early` the following sbt plugins are also brought in:
-- [sbt-pgp](https://github.com/sbt/sbt-pgp): to cryptographically sign the artifacts before publishing
-- [sbt-sonatype](https://github.com/xerial/sbt-sonatype): to publish artifacts to Sonatype
+- [sbt-pgp](https://github.com/sbt/sbt-pgp): signs the artifacts before publishing
+- [sbt-sonatype](https://github.com/xerial/sbt-sonatype): publishes your artifacts to Sonatype
+- [sbt-git](https://github.com/sbt/sbt-git/): sets the project version based on the git tag
 
 ## FAQ
+
+### Publishing to sonatype failed with a cryptic SAXParseException
+```
+org.xml.sax.SAXParseException; lineNumber: 6; columnNumber: 3; The element type "hr" must be terminated by the matching end-tag "</hr>".
+```
+The most likely cause is that sonatype is having infrastructure issues and sends a timeout. 
+The error message is quite cryptic because sbt-sonatype doesn't handle that case well, but the root issue is (likely) that sonatype's infrastructure is flakey. 
+* [sbt-sonatype parser issue](https://github.com/xerial/sbt-sonatype/issues/81)
+* [sonatype status](https://status.maven.org/)
 
 ### jdk8
 If you want to use jdk8 (which is end of life), you need to make the following changes:

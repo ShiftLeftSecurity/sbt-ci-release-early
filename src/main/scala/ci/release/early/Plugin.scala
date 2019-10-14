@@ -21,31 +21,26 @@ object Plugin extends AutoPlugin {
      * - didn't know how to update the version within the task
      * - didn't figure out how to automatically cross-build without lot's of extra code
     */
-    commands += Command.command("ci-release") { state =>
-      println("Running ci-release (cross scala versions)")
-      val versionAndTag = Utils.determineAndTagTargetVersion
-      s"""set ThisBuild/version := "${versionAndTag.version}"""" ::
-        "verifyNoSnapshotDependencies" ::
-        "+publish" ::
-        s"git-push-tag ${versionAndTag.tag}" ::
-        state
+    commands += Command.command("ciReleaseTagNextVersion") { state =>
+      def log(msg: String) = sLog.value.info(msg)
+      val tag = Utils.determineAndTagTargetVersion(log).tag
+      Utils.push(tag, log)
+      sLog.value.info("reloading sbt so that sbt-git will set the `version`" +
+        s" setting based on the git tag ($tag)")
+      "reload" :: state
     },
-    commands += Command.command("ci-release-sonatype") { state =>
-      println("Running ci-release-sonatype")
+    commands += Command.command("ciRelease") { state =>
+      sLog.value.info("Running ci-release")
+      "verifyNoSnapshotDependencies" :: "+publish" :: state
+    },
+    commands += Command.command("ciReleaseSonatype") { state =>
+      sLog.value.info("Running ci-release-sonatype")
       assert(pgpPassphrase.value.isDefined,
         "please specify PGP_PASSPHRASE as an environment variable (e.g. `export PGP_PASSPHRASE='secret')")
-      val versionAndTag = Utils.determineAndTagTargetVersion
-      s"""set ThisBuild/version := "${versionAndTag.version}"""" ::
-        "verifyNoSnapshotDependencies" ::
+      "verifyNoSnapshotDependencies" ::
         "+publishSigned" ::
         "sonatypeBundleRelease" ::
-        s"git-push-tag ${versionAndTag.tag}" ::
         state
-    },
-    commands += Command.single("git-push-tag") { (state, tag) =>
-      Utils.push(tag)
-      println(s"pushed git tag $tag to origin")
-      state
     },
   )
 
