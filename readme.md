@@ -7,8 +7,9 @@ Sbt plugin for fully automated releases, without SNAPSHOT and git sha's in the v
 
 - [Features](#features)
 - [Installation](#installation)
-- [In-house setup (e.g. jenkins/artifactory)](#in-house-setup-eg-jenkinsartifactory)
-- [Public build (e.g. travis.ci/sonatype)](#public-build-eg-traviscisonatype)
+- [Configuration for an in-house repository (e.g. jenkins/artifactory)](#configuration-for-an-in-house-repository-eg-jenkinsartifactory)
+- [Configuration for sonatype (maven central) via travis.ci](#configuration-for-sonatype-maven-central-via-travisci)
+- [Configuration for bintray (jfrog jcenter) via travis.ci](#configuration-for-bintray-jfrog-jcenter-via-travisci)
 - [Dependencies](#dependencies)
 - [FAQ](#faq)
 - [Alternatives](#alternatives)
@@ -21,26 +22,26 @@ Sbt plugin for fully automated releases, without SNAPSHOT and git sha's in the v
 * automatically performs a cross-release if your build has multiple scala versions configured
 * uses sbt-sonatype's fast new `sonatypeBundleRelease`
 * use `ciRelease` for your in-house setup (e.g. jenkins/artifactory/nexus etc), very easy to configure
-* use `ciReleaseSonatype` for your open source travis/sonatype/maven central setup, a little more involved to configure
+* use `ciReleaseBintray` for your open source jfrog jcenter setup
+* use `ciReleaseSonatype` for your open source travis/sonatype/maven-central setup, a little more involved to configure
 * easy to test locally (faster turnaround than debugging on travis.ci)
-* automatically handles cross release for multiple scala versions
 * verifies that your build does not depend on any snapshot dependencies
 
 ## Installation
 
 Add the dependency in your `projects/plugins.sbt`:
 ```
-addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "1.1.13")
+addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "1.1.14")
 ```
 
 Latest version: [![Scaladex](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)
 
-Enable sbt-git (brought in as a plugin dependency) in your `build.sbt`:
+Enable sbt-git (automatically brought in as a plugin dependency) in your `build.sbt`, this will automatically set the `version` based on your git repo (e.g. the git tag, or as a fallback the commit sha)
 ```
 enablePlugins(GitVersioning)
 ```
 
-## In-house setup (e.g. jenkins/artifactory)
+## Configuration for an in-house repository (e.g. jenkins/artifactory)
 Make sure the typical `publishTo` variable in your `built.sbt` points to your repository (this isn't specific to this plugin). Example in `build.sbt`:
 ```
 ThisBuild / publishTo := Some("releases" at "https://shiftleft.jfrog.io/shiftleft/libs-release-local")
@@ -69,8 +70,8 @@ sbt clean test ciReleaseTagNextVersion ciRelease
 
 Cross builds (for multiple scala versions) work seamlessly (the plugin just calls `+publishSigned`). 
 
-## Sonatype / maven central (e.g. via travis.ci)
-Public repositories like Sonatype (which syncs to maven central) typically impose additional constraints on the published artifacts, so the setup becomes a little more involved. These steps assume you're using travis.ci, but it should be similar on other build servers. 
+## Configuration for sonatype (maven central) via travis.ci
+Sonatype (which syncs to maven central) imposes additional constraints on the published artifacts, so the setup becomes a little more involved. These steps assume you're using travis.ci, but it'd be similar on other build servers. 
 
 ### Sonatype account
 If you don't have a sonatype account yet, follow the instructions in https://central.sonatype.org/pages/ossrh-guide.html to create one. 
@@ -82,7 +83,7 @@ Make sure `build.sbt` *does not* define any of the following settings
 Ensure the following settings *are* defined in your `build.sbt`:
 - `enablePlugins(GitVersioning)`: enable sbt-git (automatically brought in as a plugin dependency)
 - `name`
-- `organization`: must match your sonatype account priviledges
+- `organization`: must match your sonatype account name
 - `licenses`
 - `developers`
 - `scmInfo`
@@ -235,6 +236,103 @@ travis encrypt-file private-key.pem --add
 
 That's all - give it a try. Remember to add `private-key.pem.enc` to your repository, but *not* `private-key.pem`.
 
+## Configuration for bintray (jfrog jcenter) via travis.ci
+Bintray is an alternative open source repository that's easier to set up on the publishing side. The downside is that users of your artifacts will have to add jcenter to their resolvers (`resolvers += Resolver.jcenterRepo` in sbt).
+
+### Bintray setup
+1. Create an account on https://bintray.com/signup if you don't have one yet.
+2. Create a repository named `maven` of type `maven`
+3. Create and note down an API which we'll later use for the CI server: Profile -> Edit -> Api Key
+
+### build.sbt
+Make sure `build.sbt` *does not* define any of the following settings
+- `version`
+- `publishTo`
+
+Ensure the following settings *are* defined in your `build.sbt`:
+- `enablePlugins(GitVersioning)`: enable sbt-git (automatically brought in as a plugin dependency)
+- `name`
+- `organization`: must match your bintray account name
+- `licenses`
+- `bintrayVcsUrl`: must be the `https` url, e.g. `https://github.com/mpollmeier/sbt-ci-release-early-usage-bintray.git`
+
+Example: https://github.com/mpollmeier/sbt-ci-release-early-usage-bintray/blob/master/build.sbt
+
+### initial version tag
+If you don't have any previous versions tagged in git, now is the time to choose your versioning scheme. To do so simply tag your current commit with the version you want: 
+```
+git tag v0.0.1
+```
+N.b. other versioning schemes like `v1`, `v0.1`, `v0.0.0.1` will work as well. 
+
+To double check that the auto-tagging works, let the plugin create a new version tag for you:
+```
+sbt ciReleaseTagNextVersion
+```
+
+### Git push access
+
+Travis will automatically tag each release in git. In order to push that tag, it needs push access to your repository. The easiest way to achieve that is to create a [personal access token](https://github.com/settings/tokens) for travis. Note it down somewhere, it will be used in the next section (and you can use for all your travis builds).
+
+### travis.ci
+
+Open the "Settings" panel for your project on Travis CI, for example
+https://travis-ci.org/mpollmeier/sbt-ci-release-early-usage/settings
+
+And define the following secret variables. They are shared with travis, but cannot be accessed outside your build:
+
+- `BINTRAY_USER`: The username you use to log into https://bintray.com
+- `BINTRAY_PASS`: The API key (i.e. not the password!) for your bintray account
+- `GITHUB_TOKEN`: the token that allows travis to push to your remote git(hub) repository
+
+Now configure your `.travis.yml`. There are many ways to do this, but to make things simple you can just copy paste the following into your `.travis.yml`. It sets up your build in two stages:
+
+* `test`: always run `sbt +test`
+* `release`: if it's the `master` branch and all tests passed, run `sbt ciReleaseTagNextVersion ciReleaseBintray`
+
+```yml
+dist: bionic
+language: scala
+jdk: openjdk11
+if: tag IS blank
+
+before_install:
+- git fetch --tags
+
+stages:
+- name: test
+- name: release
+  if: branch = master AND type = push
+
+jobs:
+  include:
+    - stage: test
+      script: sbt +test
+    - stage: release
+      script: sbt ciReleaseTagNextVersion ciReleaseBintray
+
+before_cache:
+- find $HOME/.sbt -name "*.lock" -type f -delete
+- find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete
+- rm -rf $HOME/.ivy2/local
+cache:
+  directories:
+  - "$HOME/.sbt/1.0/dependency"
+  - "$HOME/.sbt/boot/scala*"
+  - "$HOME/.sbt/launchers"
+  - "$HOME/.ivy2/cache"
+  - "$HOME/.coursier"
+```
+
+### configure sync to jcenter (optional)
+
+After your first successful release, your artifacts can be resolved from your personal jfrog open source repo, i.e. users need to add something like `resolvers += Resolver.bintrayRepo("mpollmeier", "maven")` to their builds. 
+
+If you want to make them available on [jcenter](https://bintray.com/bintray/jcenter) (jfrog's equivalent of maven central), you need to manually request the inclusion for one of your published artifacts on the bintray web ui: `Actions -> add to jcenter -> tick pom project -> enter description -> Send`. The approval typically takes 15mins, you'll get a message on bintray and email. This is a one-off: all future versions of that package will be available on jcenter automatically. 
+
+Because sbt unfortunately doesn't have jcenter as a default resolver, users still need to add it though: `resolvers += Resolver.jcenterRepo`.
+
+
 ## Dependencies
 By installing `sbt-ci-release-early` the following sbt plugins are also brought in:
 - [sbt-pgp](https://github.com/sbt/sbt-pgp): signs the artifacts before publishing
@@ -324,12 +422,6 @@ There exist great alternatives to sbt-ci-release-early that may work better for 
 
 - [sbt-ci-release](https://github.com/olafurpg/sbt-ci-release):
   Releases versions that you previously tagged in git (rather than automatically tagging every build).
-  This plugin started as a fork of sbt-ci-release. 
-  I ran into [some issues](https://github.com/olafurpg/sbt-ci-release/issues/13) with gpg keys, ymmv. 
+  This plugin started as a fork of sbt-ci-release. I ran into [some issues](https://github.com/olafurpg/sbt-ci-release/issues/13) with gpg keys, ymmv. 
 - [sbt-release-early](https://github.com/scalacenter/sbt-release-early):
-  additionally supports publishing to Bintray
-- [sbt-rig](https://github.com/Verizon/sbt-rig): additionally supporting
-  publishing code coverage reports, managing test dependencies and publishing
-  docs.
-  
-
+- [sbt-rig](https://github.com/Verizon/sbt-rig)

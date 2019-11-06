@@ -1,5 +1,6 @@
 package ci.release.early
 
+import bintray.BintrayPlugin
 import com.jsuereth.sbtpgp.SbtPgp
 import com.jsuereth.sbtpgp.SbtPgp.autoImport._
 import sbt._
@@ -30,11 +31,11 @@ object Plugin extends AutoPlugin {
       "reload" :: state
     },
     commands += Command.command("ciRelease") { state =>
-      sLog.value.info("Running ci-release")
+      sLog.value.info("Running ciRelease")
       "verifyNoSnapshotDependencies" :: "+publish" :: state
     },
     commands += Command.command("ciReleaseSonatype") { state =>
-      sLog.value.info("Running ci-release-sonatype")
+      sLog.value.info("Running ciReleaseSonatype")
       assert(pgpPassphrase.value.isDefined,
         "please specify PGP_PASSPHRASE as an environment variable (e.g. `export PGP_PASSPHRASE='secret')")
       "verifyNoSnapshotDependencies" ::
@@ -42,9 +43,15 @@ object Plugin extends AutoPlugin {
         "sonatypeBundleRelease" ::
         state
     },
+    commands += Command.command("ciReleaseBintray") { state =>
+      sLog.value.info("Running ciReleaseBintray")
+        "verifyNoSnapshotDependencies" ::
+        "+publish" ::
+        state
+    },
   )
 
-  override def requires = SbtPgp && Sonatype
+  override def requires = SbtPgp && Sonatype && BintrayPlugin
   override def trigger = allRequirements
 
   override lazy val projectSettings = Seq(
