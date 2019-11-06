@@ -277,7 +277,7 @@ Travis will automatically tag each release in git. In order to push that tag, it
 ### travis.ci
 
 Open the "Settings" panel for your project on Travis CI, for example
-https://travis-ci.org/mpollmeier/sbt-ci-release-early-usage/settings
+https://travis-ci.org/mpollmeier/sbt-ci-release-early-usage-bintray/settings
 
 And define the following secret variables. They are shared with travis, but cannot be accessed outside your build:
 
