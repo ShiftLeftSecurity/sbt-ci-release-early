@@ -324,6 +324,18 @@ cache:
   - "$HOME/.coursier"
 ```
 
+### provide usage information in your readme (optional)
+Some snippets that may prove useful for your readme:
+
+```
+[![bintray](https://api.bintray.com/packages/shiftleft/maven/codepropertygraph/images/download.svg)](https://bintray.com/shiftleft/maven/codepropertygraph/_latestVersion)
+
+libraryDependencies += "io.shiftleft" %% "codepropertygraph" % "x.y.z"
+resolvers += Resolver.bintrayRepo("shiftleft", "maven")
+
+Other build tools: see [bintray instructions](https://bintray.com/shiftleft/maven/codepropertygraph/_latestVersion).
+```
+
 ### configure sync to jcenter (optional)
 
 After your first successful release, your artifacts can be resolved from your personal jfrog open source repo, i.e. users need to add something like `resolvers += Resolver.bintrayRepo("mpollmeier", "maven")` to their builds. 
@@ -332,6 +344,7 @@ If you want to make them available on [jcenter](https://bintray.com/bintray/jcen
 
 Because sbt unfortunately doesn't have jcenter as a default resolver, users still need to add it though: `resolvers += Resolver.jcenterRepo`.
 
+N.b. sometimes the package already exists, e.g. as an automatic proxy package created by bintray. You can claim ownership on the package page though.
 
 ## Dependencies
 By installing `sbt-ci-release-early` the following sbt plugins are also brought in:
