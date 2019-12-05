@@ -31,7 +31,7 @@ Sbt plugin for fully automated releases, without SNAPSHOT and git sha's in the v
 
 Add the dependency in your `projects/plugins.sbt`:
 ```
-addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "1.1.14")
+addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "1.2.1")
 ```
 
 Latest version: [![Scaladex](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)
@@ -243,6 +243,12 @@ Bintray is an alternative open source repository that's easier to set up on the 
 1. Create an account on https://bintray.com/signup if you don't have one yet.
 2. Create a repository named `maven` of type `maven`
 3. Create and note down an API which we'll later use for the CI server: Profile -> Edit -> Api Key
+
+### project/plugins.sbt
+```
+addSbtPlugin("org.foundweekends" % "sbt-bintray" % "0.5.4")
+```
+n.b. this is not a transitive dependency of this plugin because it takes over all settings, so regardless of what else you configure, it will always publish to bintray (as `inspect publish` shows).
 
 ### build.sbt
 Make sure `build.sbt` *does not* define any of the following settings

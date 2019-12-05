@@ -1,6 +1,5 @@
 package ci.release.early
 
-import bintray.BintrayPlugin
 import com.jsuereth.sbtpgp.SbtPgp
 import com.jsuereth.sbtpgp.SbtPgp.autoImport._
 import sbt._
@@ -51,7 +50,7 @@ object Plugin extends AutoPlugin {
     },
   )
 
-  override def requires = SbtPgp && Sonatype && BintrayPlugin
+  override def requires = SbtPgp && Sonatype
   override def trigger = allRequirements
 
   override lazy val projectSettings = Seq(
