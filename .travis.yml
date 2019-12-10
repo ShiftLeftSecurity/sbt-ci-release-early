@@ -20,7 +20,7 @@ jobs:
   - stage: test
     script: sbt +test
   - stage: release
-    script: sbt ci-release-sonatype
+    script: sbt ciReleaseTagNextVersion ciReleaseSonatype
 
 before_cache:
 - find $HOME/.sbt -name "*.lock" -type f -delete
