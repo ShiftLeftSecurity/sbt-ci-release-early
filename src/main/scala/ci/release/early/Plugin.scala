@@ -11,12 +11,15 @@ object Plugin extends AutoPlugin {
   object autoImport {
     val verifyNoSnapshotDependencies = taskKey[Unit]("Verify there are no snapshot dependencies (fail otherwise)")
     // val currentTag = settingKey[String]("tag for this version")
+
+    val runOnRelease = taskKey[Unit]("Will be run as part of the release")
   }
   import autoImport._
 
   override def globalSettings: Seq[Def.Setting[_]] = List(
     publishArtifact.in(Test) := false,
     publishMavenStyle := true,
+    runOnRelease := (),
     /* I tried to define these commands as tasks, but had the following errors:
      * - didn't know how to update the version within the task
      * - didn't figure out how to automatically cross-build without lot's of extra code
@@ -31,7 +34,7 @@ object Plugin extends AutoPlugin {
     },
     commands += Command.command("ciRelease") { state =>
       sLog.value.info("Running ciRelease")
-      "verifyNoSnapshotDependencies" :: "+publish" :: state
+      "verifyNoSnapshotDependencies" :: "+publish" :: "runOnRelease" :: state
     },
     commands += Command.command("ciReleaseSonatype") { state =>
       sLog.value.info("Running ciReleaseSonatype")
@@ -40,12 +43,14 @@ object Plugin extends AutoPlugin {
       "verifyNoSnapshotDependencies" ::
         "+publishSigned" ::
         "sonatypeBundleRelease" ::
+        "runOnRelease" ::
         state
     },
     commands += Command.command("ciReleaseBintray") { state =>
       sLog.value.info("Running ciReleaseBintray")
         "verifyNoSnapshotDependencies" ::
         "+publish" ::
+        "runOnRelease" ::
         state
     },
   )
