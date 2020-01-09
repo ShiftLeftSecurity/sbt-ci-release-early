@@ -201,7 +201,7 @@ before_install:
 - git fetch --tags
 
 install:
-- gpg --import private-key.pem
+- gpg --batch --import private-key.pem
 
 stages:
 - name: test
