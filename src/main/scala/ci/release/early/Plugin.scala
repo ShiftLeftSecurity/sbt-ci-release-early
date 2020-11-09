@@ -1,11 +1,7 @@
 package ci.release.early
 
-import com.jsuereth.sbtpgp.SbtPgp
-import com.jsuereth.sbtpgp.SbtPgp.autoImport._
 import sbt._
 import sbt.Keys._
-import xerial.sbt.Sonatype
-import xerial.sbt.Sonatype.autoImport._
 
 object Plugin extends AutoPlugin {
   object autoImport {
@@ -34,8 +30,6 @@ object Plugin extends AutoPlugin {
     },
     commands += Command.command("ciReleaseSonatype") { state =>
       sLog.value.info("Running ciReleaseSonatype")
-      assert(pgpPassphrase.value.isDefined,
-        "please specify PGP_PASSPHRASE as an environment variable (e.g. `export PGP_PASSPHRASE='secret')")
       "verifyNoSnapshotDependencies" ::
         "clean" ::
         "sonatypeBundleClean" ::
