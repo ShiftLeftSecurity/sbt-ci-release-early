@@ -24,6 +24,27 @@ object Plugin extends AutoPlugin {
         s" setting based on the git tag ($tag)")
       "verifyNoSnapshotDependencies" :: "reload" :: state
       },
+    commands += Command.command("ciRelease") { state =>
+      sLog.value.info("Running ciRelease")
+      "verifyNoSnapshotDependencies" :: "+publish" :: state
+    },
+    commands += Command.command("ciReleaseSonatype") { state =>
+      sLog.value.info("Running ciReleaseSonatype")
+      assert(pgpPassphrase.value.isDefined,
+        "please specify PGP_PASSPHRASE as an environment variable (e.g. `export PGP_PASSPHRASE='secret')")
+      "verifyNoSnapshotDependencies" ::
+        "clean" ::
+        "sonatypeBundleClean"
+        "+publishSigned" ::
+        "sonatypeBundleRelease" ::
+        state
+    },
+    commands += Command.command("ciReleaseBintray") { state =>
+      sLog.value.info("Running ciReleaseBintray")
+        "verifyNoSnapshotDependencies" ::
+        "+publish" ::
+        state
+    },
   )
 
   override def trigger = allRequirements
