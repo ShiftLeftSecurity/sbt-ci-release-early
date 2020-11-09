@@ -1,16 +1,11 @@
 package ci.release.early
 
-import com.jsuereth.sbtpgp.SbtPgp
-import com.jsuereth.sbtpgp.SbtPgp.autoImport._
 import sbt._
 import sbt.Keys._
-import xerial.sbt.Sonatype
-import xerial.sbt.Sonatype.autoImport._
 
 object Plugin extends AutoPlugin {
   object autoImport {
     val verifyNoSnapshotDependencies = taskKey[Unit]("Verify there are no snapshot dependencies (fail otherwise)")
-    // val currentTag = settingKey[String]("tag for this version")
   }
   import autoImport._
 
@@ -27,39 +22,14 @@ object Plugin extends AutoPlugin {
       Utils.push(tag, log)
       sLog.value.info("reloading sbt so that sbt-git will set the `version`" +
         s" setting based on the git tag ($tag)")
-      "reload" :: state
-    },
-    commands += Command.command("ciRelease") { state =>
-      sLog.value.info("Running ciRelease")
-      "verifyNoSnapshotDependencies" :: "+publish" :: state
-    },
-    commands += Command.command("ciReleaseSonatype") { state =>
-      sLog.value.info("Running ciReleaseSonatype")
-      assert(pgpPassphrase.value.isDefined,
-        "please specify PGP_PASSPHRASE as an environment variable (e.g. `export PGP_PASSPHRASE='secret')")
-      "verifyNoSnapshotDependencies" ::
-        "+publishSigned" ::
-        "sonatypeBundleRelease" ::
-        state
-    },
-    commands += Command.command("ciReleaseBintray") { state =>
-      sLog.value.info("Running ciReleaseBintray")
-        "verifyNoSnapshotDependencies" ::
-        "+publish" ::
-        state
-    },
+      "verifyNoSnapshotDependencies" :: "reload" :: state
+      },
   )
 
-  override def requires = SbtPgp && Sonatype
   override def trigger = allRequirements
 
   override lazy val projectSettings = Seq(
     verifyNoSnapshotDependencies := verifyNoSnapshotDependenciesTask.value
-    // currentTag := currentTag.value
-  )
-
-  override def buildSettings: Seq[Def.Setting[_]] = List(
-    pgpPassphrase := sys.env.get("PGP_PASSPHRASE").map(_.toCharArray)
   )
 
   lazy val verifyNoSnapshotDependenciesTask = Def.task {

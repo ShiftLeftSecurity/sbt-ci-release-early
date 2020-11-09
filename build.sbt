@@ -8,7 +8,6 @@ scalaVersion := "2.12.12"
 libraryDependencies ++= List(
   "org.eclipse.jgit" % "org.eclipse.jgit" % "5.4.3.201909031940-r",
   "com.michaelpollmeier" % "versionsort" % "1.0.1",
-  "org.apache.httpcomponents" % "httpclient" % "4.5.10",
   "org.scalatest" %% "scalatest" % "3.0.8" % Test)
 
 addSbtPlugin("com.geirsson" % "sbt-ci-release" % "1.5.4")
@@ -28,3 +27,7 @@ developers := List(
 )
 
 Global/useGpgPinentry := true
+
+Global / onChangedBuildSource := ReloadOnSourceChanges
+
+publishTo := sonatypePublishToBundle.value
