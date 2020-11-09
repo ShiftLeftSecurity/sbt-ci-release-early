@@ -1,5 +1,6 @@
 moduleName := "sbt-ci-release-early"
-organization := "io.shiftleft"
+// organization := "io.shiftleft"
+organization := "com.michaelpollmeier"
 sbtPlugin := true
 enablePlugins(GitVersioning)
 
