@@ -43,12 +43,6 @@ object Plugin extends AutoPlugin {
         "sonatypeBundleRelease" ::
         state
     },
-    commands += Command.command("ciReleaseBintray") { state =>
-      sLog.value.info("Running ciReleaseBintray")
-        "verifyNoSnapshotDependencies" ::
-        "+publish" ::
-        state
-    },
   )
 
   override def trigger = allRequirements
