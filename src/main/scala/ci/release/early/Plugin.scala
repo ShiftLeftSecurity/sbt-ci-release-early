@@ -1,5 +1,6 @@
 package ci.release.early
 
+import com.geirsson.CiReleasePlugin
 import sbt._
 import sbt.Keys._
 
@@ -30,6 +31,11 @@ object Plugin extends AutoPlugin {
     },
     commands += Command.command("ciReleaseSonatype") { state =>
       sLog.value.info("Running ciReleaseSonatype")
+      CiReleasePlugin.setupGpg()
+      val reloadKeyFiles =
+        "; set pgpSecretRing := pgpSecretRing.value; set pgpPublicRing := pgpPublicRing.value"
+
+      reloadKeyFiles ::
       "verifyNoSnapshotDependencies" ::
         "clean" ::
         "sonatypeBundleClean" ::
