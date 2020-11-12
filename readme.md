@@ -8,28 +8,27 @@ Sbt plugin for fully automated releases, without SNAPSHOT and git sha's in the v
 - [Features](#features)
 - [Installation](#installation)
 - [Configuration for an in-house repository (e.g. jenkins/artifactory)](#configuration-for-an-in-house-repository-eg-jenkinsartifactory)
-- [Configuration for sonatype (maven central) via travis.ci](#configuration-for-sonatype-maven-central-via-travisci)
+- [Configuration for sonatype (maven central) via github actions](#configuration-for-sonatype-maven-central-via-github-actions)
 - [Dependencies](#dependencies)
 - [FAQ](#faq)
 - [Alternatives](#alternatives)
 <!-- markdown-toc --maxdepth 1 --no-firsth1 readme.md -->
 
 ## Features
-* detects last version from git (e.g. `v1.0.0`) and increments the last digit, i.e. the next release is automatically inferred as `v1.0.1`
-* no more need to manually tag the builds
-* builds the release, creates a local git tag, publishes the artifact, publishes the git tag
+* detects last version from git tags (e.g. `v1.0.0`), and automatically tags and releases the next version as `v1.0.1`
+* no snapshots, no manual tagging
 * automatically performs a cross-release if your build has multiple scala versions configured
 * uses sbt-sonatype's fast new `sonatypeBundleRelease`
 * use `ciRelease` for your in-house setup (e.g. jenkins/artifactory/nexus etc), very easy to configure
-* use `ciReleaseSonatype` for your open source travis/sonatype/maven-central setup, a little more involved to configure
-* easy to test locally (faster turnaround than debugging on travis.ci)
+* use `ciReleaseSonatype` for your open source actions/sonatype/maven-central setup, a little more involved to configure
+* easy to test locally (faster turnaround than debugging on ci)
 * verifies that your build does not depend on any snapshot dependencies
 
 ## Installation
 
 Add the dependency in your `projects/plugins.sbt`:
 ```
-addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "1.2.1")
+addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % <version>)
 ```
 
 Latest version: [![Scaladex](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)
@@ -68,14 +67,14 @@ sbt clean test ciReleaseTagNextVersion ciRelease
 
 Cross builds (for multiple scala versions) work seamlessly (the plugin just calls `+publishSigned`). 
 
-## Configuration for sonatype (maven central) via travis.ci
-Sonatype (which syncs to maven central) imposes additional constraints on the published artifacts, so the setup becomes a little more involved. These steps assume you're using travis.ci, but it'd be similar on other build servers. 
+## Configuration for sonatype (maven central) via github actions
+Sonatype (which syncs to maven central) imposes additional constraints on the published artifacts, so the setup becomes a little more involved. These steps assume you're using github actions, but it'd be similar on other build servers. 
 
 ### Sonatype account
 If you don't have a sonatype account yet, follow the instructions in https://central.sonatype.org/pages/ossrh-guide.html to create one. 
 
 ### build.sbt
-Make sure `build.sbt` *does not* define any of the following settings
+Make sure `build.sbt` *does not* define any of the following settings:
 - `version`
 
 Ensure the following settings *are* defined in your `build.sbt`:
