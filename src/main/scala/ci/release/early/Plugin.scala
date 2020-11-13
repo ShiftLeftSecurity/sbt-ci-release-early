@@ -82,7 +82,8 @@ object Plugin extends AutoPlugin {
   override def trigger = allRequirements
 
   override lazy val projectSettings = Seq(
-    verifyNoSnapshotDependencies := verifyNoSnapshotDependenciesTask.value
+    verifyNoSnapshotDependencies := verifyNoSnapshotDependenciesTask.value,
+    publishTo := sonatypePublishToBundle.value
   )
 
   lazy val verifyNoSnapshotDependenciesTask = Def.task {
