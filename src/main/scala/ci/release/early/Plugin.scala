@@ -2,15 +2,15 @@ package ci.release.early
 
 import com.jsuereth.sbtpgp.SbtPgp
 import com.typesafe.sbt.GitPlugin
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.util.Base64
 import sbt._
 import sbt.plugins.JvmPlugin
 import sbt.Keys._
-import xerial.sbt.Sonatype
-
-import java.nio.file.Files
-import java.nio.file.Paths
 import scala.sys.process._
+import xerial.sbt.Sonatype
+import xerial.sbt.Sonatype.autoImport.sonatypePublishToBundle
 
 object Plugin extends AutoPlugin {
   object autoImport {
