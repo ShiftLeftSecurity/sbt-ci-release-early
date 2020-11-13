@@ -38,24 +38,27 @@ Enable sbt-git (automatically brought in as a plugin dependency) in your `build.
 enablePlugins(GitVersioning)
 ```
 
-## Configuration for an in-house repository (e.g. jenkins/artifactory)
-Make sure the typical `publishTo` variable in your `built.sbt` points to your repository (this isn't specific to this plugin). Example in `build.sbt`:
-```
-ThisBuild / publishTo := Some("releases" at "https://shiftleft.jfrog.io/shiftleft/libs-release-local")
-```
-
 If you don't have any previous versions tagged in git, now is the time to choose your versioning scheme. To do so simply tag your current commit with the version you want: 
 ```
 git tag v0.0.1
 ```
-N.b. other versioning schemes like `v1`, `v0.1`, `v0.0.0.1` will work as well. 
+N.b. other versioning schemes like `v1`, `v0.1`, `v0.0.0.1` will work as well, they only must start with `v`
+Ensure you don't have any uncommitted local changes and run `sbt "show version"` to verify that the git version plugin works. 
 
-To double check that the auto-tagging works, let the plugin create a new version tag for you:
+## Configuration for an in-house repository (e.g. jenkins/artifactory)
+Make sure the `publishTo` key in your `built.sbt` points to your repository:
+```
+publishTo := Some("releases" at "https://shiftleft.jfrog.io/shiftleft/libs-release-local")
+```
+If it's a multi-project build you may need to prefix it with `ThisBuild/` in your root build.sbt.
+
+Commit (and push) any local changes, then let's check that everything works - you can do this locally.
+1) auto-tagging: determines last released version based on git tags and creates a new one:
 ```
 sbt ciReleaseTagNextVersion
 ```
 
-Now let's try to publish a release from your local machine:
+2) Publish a release
 ```
 sbt ciRelease
 ```
@@ -72,20 +75,18 @@ Sonatype (which syncs to maven central) imposes additional constraints on the pu
 
 ### Sonatype account
 If you don't have a sonatype account yet, follow the instructions in https://central.sonatype.org/pages/ossrh-guide.html to create one. 
+It's advisable (yet optional) to create a user token, which guises your actual user/password.
 
 ### build.sbt
 Make sure `build.sbt` *does not* define any of the following settings:
 - `version`
 
 Ensure the following settings *are* defined in your `build.sbt`:
-- `enablePlugins(GitVersioning)`: enable sbt-git (automatically brought in as a plugin dependency)
 - `name`
-- `organization`: must match your sonatype account name
+- `organization`: must match your sonatype account
 - `licenses`
 - `developers`
 - `scmInfo`
-- `publishTo := sonatypePublishToBundle.value`
-- `Global/useGpgPinentry := true`: to ensure we're using `gpg --pinentry-mode loopback` - otherwise the sbt prompt asks for the key password, which will timeout on travis.ci. Note that this is required for gpg2. Do not configure if you use an older version (e.g. gpg1 shipped with `dist: xenial`).
 
 Example: https://github.com/mpollmeier/sbt-ci-release-early-usage/blob/master/build.sbt
 
