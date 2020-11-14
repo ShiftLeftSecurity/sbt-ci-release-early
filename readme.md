@@ -89,62 +89,35 @@ Ensure the following settings *are* defined in your `build.sbt`:
 - `scmInfo`
 
 Example: https://github.com/mpollmeier/sbt-ci-release-early-usage/blob/master/build.sbt
-
-Example for a multi-project build:
-```scala
-enablePlugins(GitVersioning)
-ThisBuild/organization := "io.shiftleft"
-ThisBuild/licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
-ThisBuild/homepage := Some(url("https://github.com/mpollmeier/sbt-ci-release"))
-ThisBuild/scmInfo := Some(ScmInfo(
-    url("https://github.com/mpollmeier/sbt-ci-release-usage"),
-    "scm:git@github.com:mpollmeier/sbt-ci-release-usage.git"))
-ThisBuild/developers := List(
-  Developer("mpollmeier", "Michael Pollmeier", "michael@michaelpollmeier.com", url("https://michaelpollmeier.com")))
-ThisBuild/publishTo := sonatypePublishToBundle.value
-Global/useGpgPinentry := true // to ensure we're using `--pinentry-mode loopback`
-```
-
-### initial version tag
-If you don't have any previous versions tagged in git, now is the time to choose your versioning scheme. To do so simply tag your current commit with the version you want: 
-```
-git tag v0.0.1
-```
-N.b. other versioning schemes like `v1`, `v0.1`, `v0.0.0.1` will work as well. 
-
-To double check that the auto-tagging works, let the plugin create a new version tag for you:
-```
-sbt ciReleaseTagNextVersion
-```
+For a multi-project build, you can define those settings in your root `build.sbt` and prefix them with `ThisBuild/`.
 
 ### gpg keys
-Sonatype requires all artifacts to be signed. Since it doesn't matter which key it's signed with, and we need to share the private key with travis.ci, we will simply create a new one specifically for this project:
+Sonatype requires all artifacts to be signed. Since it doesn't matter which key it's signed with, and we need to share the private key with the build server (e.g. github actions), we will simply create a new one specifically for this project:
 
 ```
 gpg --gen-key
 ```
 
-- For real name, use "$PROJECT_NAME bot", e.g. `gremlin-scala bot`
+- For real name, use "$PROJECT_NAME bot", e.g. `sbt-ci-release-early bot`
 - For email, use your own email address
 - For passphrase, generate a random password, e.g. using `apg -n1 -m20 -Mncl`
 
 At the end you'll see output like this
 
 ```
-pub   rsa2048 2018-06-10 [SC] [expires: 2020-06-09]
+pub   rsa2048 2018-06-10 [SC] [expires: 2022-11-13]
       $LONG_ID
 uid                      $PROJECT_NAME bot <$EMAIL>
 ```
 
 Take note of `$LONG_ID`, make sure to replace this ID from the code examples
-below. The ID will look something like
-`6E8ED79B03AD527F1B281169D28FC818985732D9`.
+below. The ID will look something like `499FD7755EC30DDAF43089355E00EC8C822C6A2A`.
 
 ```bash
-export LONG_ID=6E8ED79B03AD527F1B281169D28FC818985732D9
+export LONG_ID=499FD7755EC30DDAF43089355E00EC8C822C6A2A
 ```
 
-Optional: if you would like to change the key expiry date:
+Optional: if you would like to make the key never expire:
 ```bash
 gpg --edit-key $LONG_ID
 expire #follow prompt
@@ -157,104 +130,105 @@ Now have one final look and submit the public key to a keyserver (shouldn't matt
 
 ```
 gpg --list-keys $LONG_ID
-gpg --send-keys $LONG_ID
+gpg --keyserver keyserver.ubuntu.com --send-keys $LONG_ID
 ```
 
-Then export the private key locally so we can later encrypt the private one for travis. Make sure you don't publish it anywhere. The actual damage is small since it's just for this build, but the internet will shame you.
+### Secrets to share with Github actions
+So that github actions can release on your behalf, we need to share some secret via environment variables in `Settings -> Secrets`. You can either do that for your project or an entire organization. 
+
+- `SONATYPE_USERNAME`: The username you use to log into
+  https://oss.sonatype.org/. Alternatively, the name part of the user token if
+  you generated one above.
+- `SONATYPE_PASSWORD`: The password you use to log into
+  https://oss.sonatype.org/. Alternatively, the password part of the user token
+  if you generated one above. 
+- `PGP_PASSPHRASE`: The randomly generated password you used to create a fresh gpg key. 
+- `PGP_SECRET`: The base64 encoded secret of your private key that you can
+  export from the command line like here below
 
 ```
-gpg --armor --export-secret-keys $LONG_ID > private-key.pem
-echo "\nprivate-key.pem" >> .gitignore
-git add .gitignore
+# macOS
+gpg --armor --export-secret-keys $LONG_ID | base64 | pbcopy
+# Ubuntu (assuming GNU base64)
+gpg --armor --export-secret-keys $LONG_ID | base64 -w0 | xclip
+# Arch
+gpg --armor --export-secret-keys $LONG_ID | base64 | sed -z 's;\n;;g' | xclip -selection clipboard -i
+# FreeBSD (assuming BSD base64)
+gpg --armor --export-secret-keys $LONG_ID | base64 | xclip
+# Windows
+gpg --armor --export-secret-keys %LONG_ID% | openssl base64
 ```
 
-### Git push access
+Your secrets settings should look like this:
+![Screenshot 2020-11-03 at 08 45 12](https://user-images.githubusercontent.com/1408093/97960055-ee09c780-1db0-11eb-961b-076d0e503b24.png)
 
-Travis will automatically tag each release in git. In order to push that tag, it needs push access to your repository. The easiest way to achieve that is to create a [personal access token](https://github.com/settings/tokens) for travis. Note it down somewhere, it will be used in the next section (and you can use for all your travis builds).
+### Github Actions Workflow
 
-### travis.ci
+The final step is to configure your github actions workflow. There's many ways to do this, but most builds can probably take the below setup as is. It configures two workflows: one for pull requests which only runs the tests, and one for master builds, which also releases a new version. 
+Both are configured with a cache to avoid downloading all your dependencies for every build. 
 
-Open the "Settings" panel for your project on Travis CI, for example
-https://travis-ci.org/mpollmeier/sbt-ci-release-early-usage/settings
-
-And define the following secret variables. They are shared with travis, but cannot be accessed outside your build:
-
-- `SONATYPE_USERNAME`: The email you use to log into https://oss.sonatype.org/
-- `SONATYPE_PASSWORD`: The password you use to log into https://oss.sonatype.org/
-- `PGP_PASSPHRASE`: The randomly generated password you used to create a fresh gpg key.
-- `GITHUB_TOKEN`: the token that allows travis to push to your remote git(hub) repository
-
-Now configure your `.travis.yml`. There are many ways to do this, but to make things simple you can just copy paste the following into your `.travis.yml`. It sets up your build in two stages:
-
-* `test`: always run `sbt +test`
-* `release`: if it's the `master` branch and all tests passed, run `sbt ciReleaseTagNextVersion ciReleaseSonatype`
-
+<project_root>/.github/workflows/pr.yml
 ```yml
-dist: bionic
-language: scala
-jdk: openjdk11
-if: tag IS blank
-
-before_install:
-- git fetch --tags
-
-install:
-- gpg --batch --import private-key.pem
-
-stages:
-- name: test
-- name: release
-  if: branch = master AND type = push
-
+name: PR
+on: pull_request
 jobs:
-  include:
-    - stage: test
-      script: sbt +test
-    - stage: release
-      script: sbt ciReleaseTagNextVersion ciReleaseSonatype
-
-before_cache:
-- find $HOME/.sbt -name "*.lock" -type f -delete
-- find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete
-- rm -rf $HOME/.ivy2/local
-cache:
-  directories:
-  - "$HOME/.sbt/1.0/dependency"
-  - "$HOME/.sbt/boot/scala*"
-  - "$HOME/.sbt/launchers"
-  - "$HOME/.ivy2/cache"
-  - "$HOME/.coursier"
+  pr:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+      - uses: olafurpg/setup-scala@v10
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.sbt
+            ~/.coursier
+          key: ${{ runner.os }}-sbt-${{ hashfiles('**/build.sbt') }}
+      - run: sbt test
 ```
 
-Finally, share the private key with travis. Note that this has to be run from within the repository. If you haven't yet, you'll need to install [travis](https://github.com/travis-ci/travis.rb) (e.g. with `gem install travis`). 
-
+<project_root>/.github/workflows/release.yml
+```yml
+name: Release
+on:
+  push:
+    branches: [master, main]
+    tags: ["*"]
+jobs:
+  release:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: olafurpg/setup-scala@v10
+      - uses: olafurpg/setup-gpg@v3
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.sbt
+            ~/.coursier
+          key: ${{ runner.os }}-sbt-${{ hashfiles('**/build.sbt') }}
+      - run: sbt test ciReleaseTagNextVersion ciReleaseSonatype
+        env:
+          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
+          PGP_SECRET: ${{ secrets.PGP_SECRET }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
 ```
-travis encrypt-file private-key.pem --add
-```
 
-That's all - give it a try. Remember to add `private-key.pem.enc` to your repository, but *not* `private-key.pem`.
+If you want to customize those: the syntax is [documented here](https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions).
+
+That's all. Here's a demo repo: https://github.com/mpollmeier/sbt-ci-release-early-usage
 
 ## Dependencies
 By installing `sbt-ci-release-early` the following sbt plugins are also brought in:
+- [sbt-git](https://github.com/sbt/sbt-git/): sets the project version based on the git tag
 - [sbt-pgp](https://github.com/sbt/sbt-pgp): signs the artifacts before publishing
 - [sbt-sonatype](https://github.com/xerial/sbt-sonatype): publishes your artifacts to Sonatype
-- [sbt-git](https://github.com/sbt/sbt-git/): sets the project version based on the git tag
 
 ## FAQ
-
-### Publishing to sonatype failed with a cryptic SAXParseException
-```
-org.xml.sax.SAXParseException; lineNumber: 6; columnNumber: 3; The element type "hr" must be terminated by the matching end-tag "</hr>".
-```
-The most likely cause is that sonatype is having infrastructure issues and sends a timeout. 
-The error message is quite cryptic because sbt-sonatype doesn't handle that case well, but the root issue is (likely) that sonatype's infrastructure is flakey. 
-* [sbt-sonatype parser issue](https://github.com/xerial/sbt-sonatype/issues/81)
-* [sonatype status](https://status.maven.org/)
-
-### jdk8
-If you want to use jdk8 (which is end of life), you need to make the following changes:
-* .travis.yml: `dist: xenial`,`jdk: openjdk8`
-* build.sbt: `Global/useGpgPinentry := false`, `Global/useGpg := false`
 
 ### How can determine the latest released version?
 
@@ -297,7 +271,7 @@ Note to future self: this would have added complexity because to trigger it we w
 Add the following to the project settings:
 
 ```scala
-skip in publish := true
+publish/skip := true
 ```
 
 ### What if my build contains subprojects?
@@ -306,7 +280,7 @@ Otherwise you can just append `subProjectName/publish` to your build pipeline, t
 
 ### Can I use my releases immediately?
 
-Yes. As soon as CI "closes" the staging repository they are available on sonatype/releases and will be synchronized to maven central within ~10mins. If you can't wait so long, add a sonatype resolver:
+As soon as CI "closes" the staging repository they are available on sonatype/releases and will be synchronized to maven central within ~10mins. If you want to use them immediately, add a sonatype resolver to the build that uses the released artifact:
 
 ```scala
 resolvers += Resolver.sonatypeRepo("releases")
@@ -314,15 +288,14 @@ resolvers += Resolver.sonatypeRepo("releases")
 
 ### Can I publish sbt plugins?
 
-You can publish sbt plugins like a normal library, no custom setup required.
-In fact, this plugin is published with a previous version of itself :)
+Yes. This plugin is published with a previous version of itself :)
 
 ## Alternatives
 
 There exist great alternatives to sbt-ci-release-early that may work better for your setup.
 
 - [sbt-ci-release](https://github.com/olafurpg/sbt-ci-release):
-  Releases versions that you previously tagged in git (rather than automatically tagging every build).
-  This plugin started as a fork of sbt-ci-release. I ran into [some issues](https://github.com/olafurpg/sbt-ci-release/issues/13) with gpg keys, ymmv. 
+  The most popular release plugin I believe. Main difference: releases versions that you previously tagged in git (rather than automatically tagging every build). 
+  This plugin is essentially a fork of sbt-ci-release, they share most traits. 
 - [sbt-release-early](https://github.com/scalacenter/sbt-release-early):
 - [sbt-rig](https://github.com/Verizon/sbt-rig)
