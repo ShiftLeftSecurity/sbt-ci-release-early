@@ -87,10 +87,13 @@ Ensure the following settings *are* defined in your `build.sbt`:
 - `licenses`
 - `developers`
 - `scmInfo`
-- `ThisBuild/publishTo := sonatypePublishToBundle.value`
+- `publishTo := sonatypePublishToBundle.value`
 
 Example: https://github.com/mpollmeier/sbt-ci-release-early-usage/blob/master/build.sbt
-For a multi-project build, you can define those settings in your root `build.sbt` and prefix them with `ThisBuild/`.
+For a multi-project build, you can define those settings in your root `build.sbt` and prefix them with `ThisBuild/`, e.g. `ThisBuild/publishTo := sonatypePublishToBundle.value`
+
+### gitignore
+`echo '/gnupg-*' >> .gitignore`
 
 ### gpg keys
 Sonatype requires all artifacts to be signed. Since it doesn't matter which key it's signed with, and we need to share the private key with the build server (e.g. github actions), we will simply create a new one specifically for this project:
