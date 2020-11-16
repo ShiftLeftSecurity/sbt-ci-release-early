@@ -1,6 +1,6 @@
 # sbt-ci-release-early
 
-[![Build Status](https://travis-ci.org/ShiftLeftSecurity/sbt-ci-release-early.svg?branch=master)](https://travis-ci.org/ShiftLeftSecurity/sbt-ci-release-early)
+[![Build Status](https://github.com/ShiftLeftSecurity/sbt-ci-release-early/workflows/release/badge.svg)](https://github.com/ShiftLeftSecurity/sbt-ci-release-early/actions?query=workflow%3Arelease)
 [![Scaladex](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)
 
 Sbt plugin for fully automated releases, without SNAPSHOT and git sha's in the version. A remix of the best ideas from [sbt-ci-release](https://github.com/olafurpg/sbt-ci-release) and [sbt-release-early](https://github.com/scalacenter/sbt-release-early/).
@@ -225,9 +225,9 @@ jobs:
 
 If you want to customize those: the syntax is [documented here](https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions).
 
-Optional: add a [status badge](https://docs.github.com/en/free-pro-team@latest/actions/managing-workflow-runs/adding-a-workflow-status-badge) to your readme: 
+Optional: add a [status badge](https://docs.github.com/en/free-pro-team@latest/actions/managing-workflow-runs/adding-a-workflow-status-badge) to your readme (replace OWNER and REPOSITORY): 
 ```
-https://github.com/<OWNER>/<REPOSITORY>/workflows/release/badge.svg
+[![Build Status](https://github.com/<OWNER>/<REPOSITORY>/workflows/release/badge.svg)](https://github.com/<OWNER>/<REPOSITORY>/actions?query=workflow%3Arelease)
 ```
 
 
