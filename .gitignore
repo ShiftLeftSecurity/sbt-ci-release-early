@@ -24,3 +24,5 @@ project/plugins/project/
 
 private-key.pem
 /.bsp
+/.bsp
+/gnupg-*
