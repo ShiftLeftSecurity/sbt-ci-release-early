@@ -87,6 +87,7 @@ Ensure the following settings *are* defined in your `build.sbt`:
 - `licenses`
 - `developers`
 - `scmInfo`
+- `homepage`
 - `publishTo := sonatypePublishToBundle.value`
 
 Example: https://github.com/mpollmeier/sbt-ci-release-early-usage/blob/master/build.sbt
@@ -173,7 +174,7 @@ Both are configured with a cache to avoid downloading all your dependencies for 
 
 <project_root>/.github/workflows/pr.yml
 ```yml
-name: PR
+name: pr
 on: pull_request
 jobs:
   pr:
@@ -189,12 +190,12 @@ jobs:
             ~/.sbt
             ~/.coursier
           key: ${{ runner.os }}-sbt-${{ hashfiles('**/build.sbt') }}
-      - run: sbt test
+      - run: sbt +test
 ```
 
 <project_root>/.github/workflows/release.yml
 ```yml
-name: Release
+name: release
 on:
   push:
     branches: [master, main]
@@ -214,7 +215,7 @@ jobs:
             ~/.sbt
             ~/.coursier
           key: ${{ runner.os }}-sbt-${{ hashfiles('**/build.sbt') }}
-      - run: sbt test ciReleaseTagNextVersion ciReleaseSonatype
+      - run: sbt +test ciReleaseTagNextVersion ciReleaseSonatype
         env:
           PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
           PGP_SECRET: ${{ secrets.PGP_SECRET }}
@@ -223,6 +224,12 @@ jobs:
 ```
 
 If you want to customize those: the syntax is [documented here](https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions).
+
+Optional: add a [status badge](https://docs.github.com/en/free-pro-team@latest/actions/managing-workflow-runs/adding-a-workflow-status-badge) to your readme: 
+```
+https://github.com/<OWNER>/<REPOSITORY>/workflows/release/badge.svg
+```
+
 
 That's all. Here's a demo repo: https://github.com/mpollmeier/sbt-ci-release-early-usage
 
