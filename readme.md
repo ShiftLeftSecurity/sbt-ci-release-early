@@ -48,7 +48,7 @@ Ensure you don't have any uncommitted local changes and run `sbt "show version"`
 ## Configuration for an in-house repository (e.g. jenkins/artifactory)
 Make sure the `publishTo` key in your `built.sbt` points to your repository:
 ```
-publishTo := Some("releases" at "https://shiftleft.jfrog.io/shiftleft/libs-release-local")
+ThisBuild/publishTo := Some("releases" at "https://shiftleft.jfrog.io/shiftleft/libs-release-local")
 ```
 If it's a multi-project build you may need to prefix it with `ThisBuild/` in your root build.sbt.
 
@@ -87,6 +87,7 @@ Ensure the following settings *are* defined in your `build.sbt`:
 - `licenses`
 - `developers`
 - `scmInfo`
+- `ThisBuild/publishTo := sonatypePublishToBundle.value`
 
 Example: https://github.com/mpollmeier/sbt-ci-release-early-usage/blob/master/build.sbt
 For a multi-project build, you can define those settings in your root `build.sbt` and prefix them with `ThisBuild/`.
