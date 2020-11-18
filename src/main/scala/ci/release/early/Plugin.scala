@@ -42,11 +42,6 @@ object Plugin extends AutoPlugin {
     },
     commands += Command.command("ciReleaseSonatype") { state =>
       sLog.value.info("Running ciReleaseSonatype")
-      setupGpg()
-      val reloadKeyFiles =
-        "; set pgpSecretRing := pgpSecretRing.value; set pgpPublicRing := pgpPublicRing.value"
-
-      reloadKeyFiles ::
       "verifyNoSnapshotDependencies" ::
         "clean" ::
         "sonatypeBundleClean" ::
@@ -55,20 +50,6 @@ object Plugin extends AutoPlugin {
         state
     },
   )
-
-  def setupGpg(): Unit = {
-    List("gpg", "--version").!
-    val secret = sys.env("PGP_SECRET")
-    if (isAzure) {
-      // base64 encoded gpg secrets are too large for Azure variables but
-      // they fit within the 4k limit when compressed.
-      Files.write(Paths.get("gpg.zip"), Base64.getDecoder.decode(secret))
-      s"unzip gpg.zip".!
-      s"gpg --import gpg.key".!
-    } else {
-      (s"echo $secret" #| "base64 --decode" #| "gpg --import").!
-    }
-  }
 
   def isAzure: Boolean =
     System.getenv("TF_BUILD") == "True"
