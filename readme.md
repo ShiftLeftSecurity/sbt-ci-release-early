@@ -105,7 +105,7 @@ gpg --gen-key
 
 - For real name, use "$PROJECT_NAME bot", e.g. `sbt-ci-release-early bot`
 - For email, use your own email address
-- For passphrase, generate a random password, e.g. using `apg -n1 -m20 -Mncl`
+- Passphrase: leave empty, i.e. no passphrase. It will warn you that it's not a good idea, but this is just a pro forma key for sonatype. You'll only share the key with github, and if it had a passphrase you'd have to share that with github as well, anyway. Private key passphrases gave me a lot of headaches across different gpg versions, so I decided to advise against them. If you like you can encrypt your private key, e.g. with gpg or openssl. 
 
 At the end you'll see output like this
 
@@ -131,10 +131,9 @@ expire #follow prompt
 save
 ```
 
-Now have one final look and submit the public key to a keyserver (shouldn't matter which one, keyservers synchronize their keys with each other):
+Now submit the public key to a keyserver (shouldn't matter which one, keyservers synchronize their keys with each other):
 
 ```
-gpg --list-keys $LONG_ID
 gpg --keyserver keyserver.ubuntu.com --send-keys $LONG_ID
 ```
 
@@ -147,9 +146,7 @@ So that github actions can release on your behalf, we need to share some secret 
 - `SONATYPE_PASSWORD`: The password you use to log into
   https://oss.sonatype.org/. Alternatively, the password part of the user token
   if you generated one above. 
-- `PGP_PASSPHRASE`: The randomly generated password you used to create a fresh gpg key. 
-- `PGP_SECRET`: The base64 encoded secret of your private key that you can
-  export from the command line like here below
+- `PGP_SECRET`: The base64 encoded secret of your private key that you can export from the command line like here below
 
 ```
 # macOS
@@ -208,7 +205,10 @@ jobs:
         with:
           fetch-depth: 0
       - uses: olafurpg/setup-scala@v10
-      - uses: olafurpg/setup-gpg@v3
+      - run: sudo apt update && sudo apt install -y gnupg
+      - run: echo $PGP_SECRET | base64 --decode | gpg --batch --import
+        env:
+          PGP_SECRET: ${{ secrets.PGP_SECRET }}
       - uses: actions/cache@v2
         with:
           path: |
@@ -217,8 +217,6 @@ jobs:
           key: ${{ runner.os }}-sbt-${{ hashfiles('**/build.sbt') }}
       - run: sbt +test ciReleaseTagNextVersion ciReleaseSonatype
         env:
-          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
-          PGP_SECRET: ${{ secrets.PGP_SECRET }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
 ```
