@@ -10,21 +10,43 @@ import versionsort.VersionHelper
 
 case class VersionAndTag(version: String, tag: String)
 
+object Version {
+
+  val majorMinorPatch = "(\\d+)\\.(\\d+).(\\d+)-?.*".r
+  val majorMinor      = "(\\d+)\\.(\\d+)".r
+  val major           = "(\\d+)".r
+
+  def unapply(string: String): Option[(Option[Int], Option[Int], Option[Int])] = string match {
+    case majorMinorPatch(major, minor, patch) => Some(Some(major.toInt), Some(minor.toInt), Some(patch.toInt))
+    case majorMinor(major, minor) => Some(Some(major.toInt), Some(minor.toInt), None)
+    case major(major)             => Some(Some(major.toInt), None, None)
+    case _                        => None
+  }
+
+}
+
+trait Increment
+object Increment {
+  case object Major extends Increment
+  case object Minor extends Increment
+  case object Patch extends Increment
+}
+
 object Utils {
 
-  def determineAndTagTargetVersion(log: String => Any): VersionAndTag = {
+  def determineAndTagTargetVersion(log: String => Any, increment: Increment): VersionAndTag = {
     verifyGitIsClean
-    val targetVersion = Utils.determineTargetVersion(log)
+    val targetVersion = Utils.determineTargetVersion(log, increment)
     val tagName = s"v$targetVersion"
     tag(tagName, log)
     VersionAndTag(targetVersion, tagName)
   }
 
-  def determineTargetVersion(log: String => Any): String = {
+  def determineTargetVersion(log: String => Any, increment: Increment): String = {
     val allTags = git.tagList.call.asScala.map(_.getName).toList
     val highestVersion = findHighestVersion(allTags, log)
     log(s"highest version so far: $highestVersion")
-    val targetVersion = incrementVersion(highestVersion)
+    val targetVersion = incrementVersion(highestVersion, increment)
     targetVersion
   }
 
@@ -43,12 +65,17 @@ object Utils {
     }
   }
 
-  /* TODO allow to configure which part of the version should be incremented, e.g. via sbt.Task */
-  def incrementVersion(version: String): String = {
-    val segments = version.split('.')
-    val lastSegment = segments.last.takeWhile(_.isDigit).toInt
-    val incremented = (lastSegment + 1).toString
-    (segments.dropRight(1) :+ incremented).mkString(".")
+  def incrementVersion(version: String, increment: Increment): String = (version, increment) match {
+    case (Version(Some(major), Some(minor), Some(patch)), Increment.Major) => s"${major + 1}.0.0"
+    case (Version(Some(major), Some(minor), Some(patch)), Increment.Minor) => s"$major.${minor + 1}.0"
+    case (Version(Some(major), Some(minor), Some(patch)), Increment.Patch) => s"$major.$minor.${patch + 1}"
+    case (Version(Some(major), Some(minor), None), Increment.Major)        => s"${major + 1}.0"
+    case (Version(Some(major), Some(minor), None), Increment.Minor)        => s"$major.${minor + 1}"
+    case (Version(Some(major), Some(minor), None), Increment.Patch)        => s"$major.$minor.1"
+    case (Version(Some(major), None, None), Increment.Major)               => s"${major + 1}"
+    case (Version(Some(major), None, None), Increment.Minor)               => s"$major.1"
+    case (Version(Some(major), None, None), Increment.Patch)               => s"$major.0.1"
+    case (version, _)                                                      => sys.error(s"Unable to extract version from $version")
   }
 
   def tag(tagName: String, log: String => Any): Unit = {

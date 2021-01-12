@@ -15,11 +15,21 @@ class UtilsTest extends WordSpec with Matchers {
   }
 
   "increment version" in {
-    Utils.incrementVersion("1") shouldBe "2"
-    Utils.incrementVersion("1.0") shouldBe "1.1"
-    Utils.incrementVersion("1.0.0") shouldBe "1.0.1"
-    Utils.incrementVersion("1.0.0-hotfix") shouldBe "1.0.1"
-    Utils.incrementVersion("1.0.0-hotfix2") shouldBe "1.0.1"
+    Utils.incrementVersion("1", Increment.Major) shouldBe "2"
+    Utils.incrementVersion("1", Increment.Minor) shouldBe "1.1"
+    Utils.incrementVersion("1", Increment.Patch) shouldBe "1.0.1"
+    Utils.incrementVersion("1.2", Increment.Major) shouldBe "2.0"
+    Utils.incrementVersion("1.2", Increment.Minor) shouldBe "1.3"
+    Utils.incrementVersion("1.2", Increment.Patch) shouldBe "1.2.1"
+    Utils.incrementVersion("1.3.1", Increment.Major) shouldBe "2.0.0"
+    Utils.incrementVersion("1.3.1", Increment.Minor) shouldBe "1.4.0"
+    Utils.incrementVersion("1.3.1", Increment.Patch) shouldBe "1.3.2"
+    Utils.incrementVersion("1.3.1-hotfix", Increment.Major) shouldBe "2.0.0"
+    Utils.incrementVersion("1.3.1-hotfix", Increment.Minor) shouldBe "1.4.0"
+    Utils.incrementVersion("1.3.1-hotfix", Increment.Patch) shouldBe "1.3.2"
+    Utils.incrementVersion("1.3.1-hotfix2", Increment.Major) shouldBe "2.0.0"
+    Utils.incrementVersion("1.3.1-hotfix2", Increment.Minor) shouldBe "1.4.0"
+    Utils.incrementVersion("1.3.1-hotfix2", Increment.Patch) shouldBe "1.3.2"
   }
 
   "interweave github token into repository url" in {

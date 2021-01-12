@@ -29,7 +29,7 @@ object Plugin extends AutoPlugin {
      * - didn't figure out how to automatically cross-build without lot's of extra code
     */
     commands += Command.command("ciReleaseTagNextVersion") { state =>
-      val tag = Utils.determineAndTagTargetVersion(state.log.info(_)).tag
+      val tag = Utils.determineAndTagTargetVersion(state.log.info(_), Increment.Patch).tag
       Utils.push(tag, state.log.info(_))
       state.log.info("reloading sbt so that sbt-git will set the `version`" +
         s" setting based on the git tag ($tag)")
