@@ -26,3 +26,11 @@ private-key.pem
 /.bsp
 /.bsp
 /gnupg-*
+
+# Metals
+.bloop
+.metals
+metals.sbt
+
+# VSCode
+.vscode
