@@ -29,19 +29,18 @@ object Plugin extends AutoPlugin {
      * - didn't figure out how to automatically cross-build without lot's of extra code
     */
     commands += Command.command("ciReleaseTagNextVersion") { state =>
-      def log(msg: String) = sLog.value.info(msg)
-      val tag = Utils.determineAndTagTargetVersion(log).tag
-      Utils.push(tag, log)
-      sLog.value.info("reloading sbt so that sbt-git will set the `version`" +
+      val tag = Utils.determineAndTagTargetVersion(state.log.info(_)).tag
+      Utils.push(tag, state.log.info(_))
+      state.log.info("reloading sbt so that sbt-git will set the `version`" +
         s" setting based on the git tag ($tag)")
       "verifyNoSnapshotDependencies" :: "reload" :: state
       },
     commands += Command.command("ciRelease") { state =>
-      sLog.value.info("Running ciRelease")
+      state.log.info("Running ciRelease")
       "verifyNoSnapshotDependencies" :: "+publish" :: state
     },
     commands += Command.command("ciReleaseSonatype") { state =>
-      sLog.value.info("Running ciReleaseSonatype")
+      state.log.info("Running ciReleaseSonatype")
       "verifyNoSnapshotDependencies" ::
         "clean" ::
         "sonatypeBundleClean" ::
