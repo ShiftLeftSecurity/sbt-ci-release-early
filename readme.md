@@ -93,6 +93,16 @@ Ensure the following settings *are* defined in your `build.sbt`:
 Example: https://github.com/mpollmeier/sbt-ci-release-early-usage/blob/master/build.sbt
 For a multi-project build, you can define those settings in your root `build.sbt` and prefix them with `ThisBuild/`, e.g. `ThisBuild/publishTo := sonatypePublishToBundle.value`
 
+  > ⚠️ Legacy Host
+  >
+  > By default, sbt-sonatype is configured to use the legacy Sonatype repository `oss.sonatype.org`. If you created a new account from February 2021, you need to configure the new repository url. Context: https://github.com/xerial/sbt-sonatype/issues/214
+  >
+  > ```scala
+  > // For all Sonatype accounts created from February 2021
+  > sonatypeCredentialHost := "s01.oss.sonatype.org"
+  > sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
+  > ```
+
 ### gitignore
 `echo '/gnupg-*' >> .gitignore`
 
