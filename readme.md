@@ -100,7 +100,6 @@ For a multi-project build, you can define those settings in your root `build.sbt
   > ```scala
   > // For all Sonatype accounts created from February 2021
   > sonatypeCredentialHost := "s01.oss.sonatype.org"
-  > sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
   > ```
 
 ### gitignore
