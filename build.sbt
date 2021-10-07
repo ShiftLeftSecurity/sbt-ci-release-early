@@ -1,18 +1,17 @@
 moduleName := "sbt-ci-release-early"
 organization := "io.shiftleft"
 sbtPlugin := true
-enablePlugins(GitVersioning)
 
-scalaVersion := "2.12.12"
+scalaVersion := "2.12.15"
 
 libraryDependencies ++= List(
   "org.eclipse.jgit" % "org.eclipse.jgit" % "5.4.3.201909031940-r",
   "com.michaelpollmeier" % "versionsort" % "1.0.1",
   "org.scalatest" %% "scalatest" % "3.0.8" % Test)
 
-addSbtPlugin("com.michaelpollmeier" % "sbt-git" % "1.0.1")
-addSbtPlugin("com.jsuereth" % "sbt-pgp" % "2.0.1")
-addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.7")
+addSbtPlugin("com.typesafe.sbt" % "sbt-git" % "1.0.2")
+addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.1.2")
+addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.10")
 
 homepage := Some(url("https://github.com/ShiftLeftSecurity/sbt-ci-release-early"))
 scmInfo := Some(ScmInfo(

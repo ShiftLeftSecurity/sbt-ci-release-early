@@ -37,6 +37,7 @@ Enable sbt-git (automatically brought in as a plugin dependency) in your `build.
 ```
 enablePlugins(GitVersioning)
 ```
+Alternatively you can use (sbt-dynver)[https://github.com/dwijnand/sbt-dynver]. 
 
 If you don't have any previous versions tagged in git, now is the time to choose your versioning scheme. To do so simply tag your current commit with the version you want: 
 ```
