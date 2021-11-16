@@ -203,6 +203,7 @@ jobs:
 <project_root>/.github/workflows/release.yml
 ```yml
 name: release
+concurrency: release
 on:
   push:
     branches: [master, main]
