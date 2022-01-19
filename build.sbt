@@ -7,7 +7,7 @@ scalaVersion := "2.12.15"
 libraryDependencies ++= List(
   "org.eclipse.jgit" % "org.eclipse.jgit" % "6.0.0.202111291000-r",
   "com.michaelpollmeier" % "versionsort" % "1.0.11",
-  "org.scalatest" %% "scalatest" % "3.0.9" % Test)
+  "org.scalatest" %% "scalatest" % "3.2.10" % Test)
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-git" % "1.0.2")
 addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.1.2")
