@@ -2,7 +2,7 @@ moduleName := "sbt-ci-release-early"
 organization := "io.shiftleft"
 sbtPlugin := true
 
-scalaVersion := "2.12.15"
+scalaVersion := "2.12.16"
 
 libraryDependencies ++= List(
   "org.eclipse.jgit" % "org.eclipse.jgit" % "5.13.0.202109080827-r",
