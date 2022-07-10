@@ -1,8 +1,10 @@
 package ci.release.early
 
 import org.scalatest._
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class UtilsTest extends WordSpec with Matchers {
+class UtilsTest extends AnyWordSpec with Matchers {
 
   "find highest version from taglist" in {
     Utils.findHighestVersion(List("refs/tags/v1.0.0"), println) shouldBe "1.0.0"
