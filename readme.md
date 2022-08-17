@@ -33,12 +33,6 @@ addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % <version>)
 
 Latest version: [![Scaladex](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)
 
-Enable sbt-git (automatically brought in as a plugin dependency) in your `build.sbt`, this will automatically set the `version` based on your git repo (e.g. the git tag, or as a fallback the commit sha)
-```
-enablePlugins(GitVersioning)
-```
-Alternatively you can use (sbt-dynver)[https://github.com/dwijnand/sbt-dynver]. 
-
 If you don't have any previous versions tagged in git, now is the time to choose your versioning scheme. To do so simply tag your current commit with the version you want: 
 ```
 git tag v0.0.1
@@ -244,7 +238,7 @@ That's all. Here's a demo repo: https://github.com/mpollmeier/sbt-ci-release-ear
 
 ## Dependencies
 By installing `sbt-ci-release-early` the following sbt plugins are also brought in:
-- [sbt-git](https://github.com/sbt/sbt-git/): sets the project version based on the git tag
+- [sbt-dynver](https://github.com/sbt/sbt-dynver): sets the project version based on the git tag
 - [sbt-pgp](https://github.com/sbt/sbt-pgp): signs the artifacts before publishing
 - [sbt-sonatype](https://github.com/xerial/sbt-sonatype): publishes your artifacts to Sonatype
 

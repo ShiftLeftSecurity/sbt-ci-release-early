@@ -1,7 +1,7 @@
 package ci.release.early
 
 import com.jsuereth.sbtpgp.SbtPgp
-import com.typesafe.sbt.GitPlugin
+import sbtdynver.DynVerPlugin
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.Base64
@@ -19,7 +19,7 @@ object Plugin extends AutoPlugin {
   import autoImport._
 
   override def requires =
-    JvmPlugin && SbtPgp && GitPlugin && Sonatype
+    JvmPlugin && SbtPgp && DynVerPlugin && Sonatype
 
   override def globalSettings: Seq[Def.Setting[_]] = List(
     publishArtifact.in(Test) := false,
@@ -32,7 +32,7 @@ object Plugin extends AutoPlugin {
       def log(msg: String) = sLog.value.info(msg)
       val tag = Utils.determineAndTagTargetVersion(log).tag
       Utils.push(tag, log)
-      sLog.value.info("reloading sbt so that sbt-git will set the `version`" +
+      sLog.value.info("reloading sbt so that sbt-dynver will set the `version`" +
         s" setting based on the git tag ($tag)")
       "verifyNoSnapshotDependencies" :: "reload" :: state
       },
