@@ -22,7 +22,7 @@ object Plugin extends AutoPlugin {
     JvmPlugin && SbtPgp && DynVerPlugin && Sonatype
 
   override def globalSettings: Seq[Def.Setting[_]] = List(
-    publishArtifact.in(Test) := false,
+    Test/publishArtifact := false,
     publishMavenStyle := true,
     /* I tried to define these commands as tasks, but had the following errors:
      * - didn't know how to update the version within the task
@@ -67,7 +67,7 @@ object Plugin extends AutoPlugin {
   )
 
   lazy val verifyNoSnapshotDependenciesTask = Def.task {
-    val moduleIds = (managedClasspath in Runtime).value.flatMap(_.get(moduleID.key))
+    val moduleIds = (Runtime/managedClasspath).value.flatMap(_.get(moduleID.key))
     val snapshots = moduleIds.filter(m => m.isChanging || m.revision.endsWith("-SNAPSHOT")).toList
     assert(snapshots.size == 0, s"expected 0 snapshot dependencies, but found: $snapshots")
   }
