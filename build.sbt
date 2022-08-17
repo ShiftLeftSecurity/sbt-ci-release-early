@@ -5,7 +5,7 @@ sbtPlugin := true
 scalaVersion := "2.12.16"
 
 libraryDependencies ++= List(
-  "org.eclipse.jgit" % "org.eclipse.jgit" % "5.13.1.202206130422-r",
+  "org.eclipse.jgit" % "org.eclipse.jgit" % "6.2.0.202206071550-r",
   "com.michaelpollmeier" % "versionsort" % "1.0.11",
   "org.scalatest" %% "scalatest" % "3.2.12" % Test)
 
