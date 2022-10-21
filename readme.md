@@ -142,7 +142,7 @@ gpg --keyserver keyserver.ubuntu.com --send-keys $LONG_ID
 ```
 
 ### Secrets to share with Github actions
-So that github actions can release on your behalf, we need to share some secret via environment variables in `Settings -> Secrets`. You can either do that for your project or an entire organization. 
+So that Github Actions can release on your behalf, we need to share some secret via environment variables in `Settings -> Secrets -> Actions`. You can either do that for your project or an entire organization. 
 
 - `SONATYPE_USERNAME`: The username you use to log into
   https://oss.sonatype.org/. Alternatively, the name part of the user token if
@@ -166,7 +166,7 @@ gpg --armor --export-secret-keys %LONG_ID% | openssl base64
 ```
 
 Your secrets settings should look like this:
-![Screenshot 2020-11-03 at 08 45 12](https://user-images.githubusercontent.com/1408093/97960055-ee09c780-1db0-11eb-961b-076d0e503b24.png)
+![secrets](https://user-images.githubusercontent.com/506752/197265585-29ee3599-3f39-44c2-bff0-8f89cbfadc32.png)
 
 ### Github Actions Workflow
 
