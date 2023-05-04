@@ -7,7 +7,7 @@ scalaVersion := "2.12.16"
 libraryDependencies ++= List(
   "org.eclipse.jgit" % "org.eclipse.jgit" % "5.13.1.202206130422-r", // do not upgrade to 6.x unless you're willing to give up java 8 compatibility
   "com.michaelpollmeier" % "versionsort" % "1.0.11",
-  "org.scalatest" %% "scalatest" % "3.2.12" % Test)
+  "org.scalatest" %% "scalatest" % "3.2.15" % Test)
 
 addSbtPlugin("com.dwijnand" % "sbt-dynver" % "4.1.1")
 addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.2.1")
