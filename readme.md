@@ -88,7 +88,7 @@ Ensure the following settings *are* defined in your `build.sbt`:
 Example: https://github.com/mpollmeier/sbt-ci-release-early-usage/blob/master/build.sbt
 For a multi-project build, you can define those settings in your root `build.sbt` and prefix them with `ThisBuild/`, e.g. `ThisBuild/publishTo := sonatypePublishToBundle.value`
 
-  > ⚠️ Legacy Host
+  > ⚠️ Sonatype hostname
   >
   > By default, sbt-sonatype is configured to use the legacy Sonatype repository `oss.sonatype.org`. If you created a new account from February 2021, you need to configure the new repository url. Context: https://github.com/xerial/sbt-sonatype/issues/214
   >
@@ -142,14 +142,18 @@ gpg --keyserver keyserver.ubuntu.com --send-keys $LONG_ID
 ```
 
 ### Secrets to share with Github actions
-So that Github Actions can release on your behalf, we need to share some secret via environment variables in `Settings -> Secrets -> Actions`. You can either do that for your project or an entire organization. 
+So that Github Actions can release on your behalf, we need to share some secrets via environment variables with github actions. You can either do that for your project or an entire organization. 
 
-- `SONATYPE_USERNAME`: The username you use to log into
-  https://oss.sonatype.org/. Alternatively, the name part of the user token if
-  you generated one above.
-- `SONATYPE_PASSWORD`: The password you use to log into
-  https://oss.sonatype.org/. Alternatively, the password part of the user token
-  if you generated one above. 
+  > ⚠️ As of June 2024 Sonatype requires to log in with an access token, you can no longer use your regular username/password. 
+  
+First you need to obtain a sonatype username/password token: 
+- log into https://oss.sonatype.org
+- select `Profile` from the dropdown at the top right
+- `User Token` -> `Access` -> `Access user token`
+
+Now go to your github project or organization and navigate to `Settings` -> `Secrets and variables` -> `Actions` and add the following `Repository secrets`:
+- `SONATYPE_USERNAME`: the name part of the user token you generated in the previous step
+- `SONATYPE_PASSWORD`: the password part of the user token you generated in the previous step
 - `PGP_SECRET`: The base64 encoded secret of your private key that you can export from the command line like here below
 
 ```
