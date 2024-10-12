@@ -9,7 +9,7 @@ libraryDependencies ++= List(
   "com.michaelpollmeier" % "versionsort" % "1.0.11",
   "org.scalatest" %% "scalatest" % "3.2.16" % Test)
 
-addSbtPlugin("com.github.sbt" % "sbt-dynver" % "5.0.1")
+addSbtPlugin("com.github.sbt" % "sbt-dynver" % "5.1.0")
 addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.2.1")
 addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.11.0")
 
