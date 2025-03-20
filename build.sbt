@@ -14,7 +14,7 @@ addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.3.0")
 // TODO back to official release once our PR is merged and released:
 // https://github.com/xerial/sbt-sonatype/pull/591
 // addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.12.2")
-addSbtPlugin("com.michaelpollmeier" % "sbt-sonatype" % "3.12.2-18-6d80072e") 
+addSbtPlugin("com.michaelpollmeier" % "sbt-sonatype" % "3.12.2-18-2c83e453") 
 // https://github.com/mpollmeier/sbt-sonatype/tree/michael/custom-release
 // https://github.com/mpollmeier/sbt-sonatype/commit/2c83e4535a122d001c5d184087b00288a52ed817
 
