@@ -7,15 +7,15 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: olafurpg/setup-scala@v10
+      - uses: sbt/setup-sbt@v1
       - run: sudo apt update && sudo apt install -y gnupg
       - run: echo $PGP_SECRET | base64 --decode | gpg --batch --import
         env:
           PGP_SECRET: ${{ secrets.PGP_SECRET }}
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.sbt
