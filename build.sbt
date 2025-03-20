@@ -11,7 +11,12 @@ libraryDependencies ++= List(
 
 addSbtPlugin("com.github.sbt" % "sbt-dynver" % "5.1.0")
 addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.3.0")
-addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.12.2")
+// TODO back to official release once our PR is merged and released:
+// https://github.com/xerial/sbt-sonatype/pull/591
+// addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.12.2")
+addSbtPlugin("com.michaelpollmeier" % "sbt-sonatype" % "3.12.2-18-6d80072e") 
+// https://github.com/mpollmeier/sbt-sonatype/tree/michael/custom-release
+// https://github.com/mpollmeier/sbt-sonatype/commit/2c83e4535a122d001c5d184087b00288a52ed817
 
 homepage := Some(url("https://github.com/ShiftLeftSecurity/sbt-ci-release-early"))
 scmInfo := Some(ScmInfo(
