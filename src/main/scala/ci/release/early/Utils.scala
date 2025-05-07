@@ -2,6 +2,8 @@ package ci.release.early
 
 import java.io.File
 import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.lib.{Constants, Repository}
+import org.eclipse.jgit.revwalk.RevWalk
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import scala.collection.JavaConverters._
 import scala.util.Try
@@ -101,8 +103,21 @@ object Utils {
       """.stripMargin)
   }
 
-  lazy val git: Git =
-    new Git(new FileRepositoryBuilder().findGitDir(new File(".")).build)
+  def findTagsOnHead(): Seq[String] = {
+    val headId = repository.resolve(Constants.HEAD)
+    val headCommit = revWalk.parseCommit(headId)
+    val tags = git.tagList().call().asScala
+    val tagsOnHead = tags.filter { tagRef =>
+      val peeledRef = repository.peel(tagRef)
+      val peeledObjectId = peeledRef.getPeeledObjectId
+      val commitIdToCompare = if (peeledObjectId != null) peeledObjectId else tagRef.getObjectId
+      commitIdToCompare == headCommit.getId
+    }
+    tagsOnHead.map(tagRef => Repository.shortenRefName(tagRef.getName))
+  }
 
+  lazy val git = new Git(new FileRepositoryBuilder().findGitDir(new File(".")).build)
+  lazy val repository = git.getRepository
+  lazy val revWalk = new RevWalk(repository)
   lazy val gitTagVersionRegex = """refs/tags/v([0-9\.]+)""".r
 }

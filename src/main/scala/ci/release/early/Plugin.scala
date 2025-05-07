@@ -31,7 +31,6 @@ object Plugin extends AutoPlugin {
     commands += Command.command("ciReleaseTagNextVersion") { state =>
       def log(msg: String) = sLog.value.info(msg)
       val tag = Utils.determineAndTagTargetVersion(log).tag
-      Utils.push(tag, log)
       sLog.value.info("reloading sbt so that sbt-dynver will set the `version`" +
         s" setting based on the git tag ($tag)")
       "verifyNoSnapshotDependencies" :: "reload" :: state
@@ -48,6 +47,20 @@ object Plugin extends AutoPlugin {
         "+publishSigned" ::
         "sonatypeBundleRelease" ::
         state
+    },
+    commands += Command.command("ciReleasePushTag") { state =>
+      def log(msg: String) = sLog.value.info(msg)
+      val extracted = Project.extract(state)
+      (extracted.currentRef / version).get(extracted.structure.data).foreach { version =>
+        val versionTag = s"v$version"
+        assert(
+          Utils.findTagsOnHead.contains(versionTag),
+          s"$versionTag tag expected on HEAD, but not found - something is wrong..."
+        )
+        log(s"pushing $versionTag")
+        Utils.push(versionTag, log)
+      }
+      state
     },
   )
 
