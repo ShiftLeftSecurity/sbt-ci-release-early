@@ -17,11 +17,10 @@ Sbt plugin for fully automated releases, without SNAPSHOT and git sha's in the v
 ## Features
 * detects last version from git tags (e.g. `v1.0.0`), and automatically tags and releases the next version as `v1.0.1`
 * no snapshots, no manual tagging
+* can be used in scheduled release jobs (can prevent duplicate releases if there haven't been any changes)
+* for both maven central and custom repositories (e.g. jenkins/artifactory/nexus etc)
+* verifies that your build does not depend on any snapshot dependencies to prevent problems early on
 * automatically performs a cross-release if your build has multiple scala versions configured
-* use `ciRelease` for your in-house setup (e.g. jenkins/artifactory/nexus etc), very easy to configure
-* use `ciReleaseSonatype` for your open source actions/sonatype/maven-central setup, a little more involved to configure
-* easy to test locally (faster turnaround than debugging on ci)
-* verifies that your build does not depend on any snapshot dependencies
 
 ## Installation
 
