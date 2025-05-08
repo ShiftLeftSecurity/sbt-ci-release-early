@@ -21,16 +21,17 @@ addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "<version>")
 <!-- markdown-toc --maxdepth 1 --no-firsth1 readme.md | tail -n +3 -->
 - [Tasks](#tasks)
 - [Setup for a custom repository (e.g. jfrog artifactory)](#setup-for-a-custom-repository-eg-jfrog-artifactory)
-- [Setup for sonatype / maven central](#setup-for-sonatype--maven-central)
+- [Setup for Sonatype / Maven central](#setup-for-sonatype--maven-central)
 - [Dependencies](#dependencies)
 - [FAQ](#faq)
 - [Alternatives](#alternatives)
+
 
 ## Tasks
 * `ciReleaseSkipIfAlreadyReleased`: check if your current HEAD commit already has a version tag, and in that case skip the other `ciRelease*` tasks below. Useful e.g. for daily builds. 
 * `ciReleaseTagNextVersion`: determine the next version (by finding the highest version and incrementing the last digit), then create a tag with that version and push it
 * `ciRelease`: publish to the configured repository
-* `ciReleaseSonatype`: publish to sonatype (using a [patched version](https://github.com/xerial/sbt-sonatype/pull/591) of [sbt-sonatype](https://github.com/xerial/sbt-sonatype))
+* `ciReleaseSonatype`: publish to Sonatype (using a [patched version](https://github.com/xerial/sbt-sonatype/pull/591) of [sbt-sonatype](https://github.com/xerial/sbt-sonatype))
 
 > [!NOTE]
 > If you don't have any previous versions tagged in git, the plugin will automatically create a `v0.1.0` tag for you. Alternatively you can manually create an initial version tag (e.g. `git tag v0.0.1`) and the plugin will take it from there. The same applies if you want to use a different versioning scheme, e.g. `v1`, `v0.1` or `v0.0.0.1`. All that matters is that they must start with `v` (by convention).
@@ -49,16 +50,16 @@ sbt ciReleaseSkipIfAlreadyReleased ciReleaseTagNextVersion ciRelease
 > [!NOTE]
 > cross builds (for multiple scala versions) work seamlessly (the plugin just calls `+publishSigned`)
 
-## Setup for sonatype / maven central
+## Setup for Sonatype / Maven central
 Sonatype central (which syncs to maven central) imposes additional constraints on the published artifacts, so the setup becomes a little more involved. These steps assume you're using github actions, but it'd be similar on other build servers. 
 
 ### Sonatype account
-If you don't have a sonatype account yet, follow the instructions in https://central.sonatype.org/pages/ossrh-guide.html to create one.
+If you don't have a Sonatype account yet, follow the instructions in https://central.sonatype.org/pages/ossrh-guide.html to create one.
 
 ### build.sbt
 In your `build.sbt` do *not* define the `version` setting and ensure the following settings *are* configured:
 - `name`
-- `organization`: must match your sonatype account
+- `organization`: must match your Sonatype account
 - `licenses`
 - `developers`
 - `scmInfo`
@@ -83,7 +84,7 @@ gpg --gen-key
 
 - For real name, use "$PROJECT_NAME bot", e.g. `sbt-ci-release-early bot`
 - For email, use your own email address
-- Passphrase: leave empty, i.e. no passphrase. It will warn you that it's not a good idea, but this is just a pro forma key for sonatype. You'll only share the key with github, and if it had a passphrase you'd have to share that with github as well, anyway. Private key passphrases gave me a lot of headaches across different gpg versions, so I decided to advise against them. If you like you can encrypt your private key, e.g. with gpg or openssl. 
+- Passphrase: leave empty, i.e. no passphrase. It will warn you that it's not a good idea, but this is just a pro forma key for Sonatype. You'll only share the key with github, and if it had a passphrase you'd have to share that with github as well, anyway. Private key passphrases gave me a lot of headaches across different gpg versions, so I decided to advise against them. If you like you can encrypt your private key, e.g. with gpg or openssl. 
 
 At the end you'll see output like this
 
@@ -119,9 +120,9 @@ gpg --keyserver keyserver.ubuntu.com --send-keys $LONG_ID
 So that Github Actions can release on your behalf, we need to share some secrets via environment variables with github actions. You can either do that for your project or an entire organization. 
 
 > [!NOTE]
-> As of June 2024 Sonatype requires to log in with an access token, you can no longer use your regular username/password. 
+> As of June 2024 Sonatype requires you to log in with an access token, you can no longer use your regular username/password. 
   
-First you need to obtain a sonatype username/password token: 
+First you need to obtain a Sonatype username/password token: 
 - log into https://oss.sonatype.org
 - select `Profile` from the dropdown at the top right
 - `User Token` -> `Access` -> `Access user token`
@@ -217,14 +218,14 @@ By installing `sbt-ci-release-early` the following sbt plugins are also brought 
 
 ### How can determine the latest released version?
 
-Other than manually looking at sonatype/maven central or git tags, you can use the following snippet that remotely gets the git tags that start with `v` and have (in this version) three decimals separated by `.`, and returns the highest version. 
+Other than manually looking at Sonatype/Maven central or git tags, you can use the following snippet that remotely gets the git tags that start with `v` and have (in this version) three decimals separated by `.`, and returns the highest version. 
 
 ```
 git ls-remote --tags $REPO | awk -F"/" '{print $3}' | grep '^v[0-9]*\.[0-9]*\.[0-9]*' | grep -v {} | sort --version-sort | tail -n1
 ```
 
-### My sonatype staging repos seems to be in a broken state
-When a build is e.g. interrupted, or didn't satisfy the sonatype requirements for publishing, it is likely that these artifacts are still lying around in the sonatype staging area. You can log into https://oss.sonatype.org/ and clean it up, or just do it from within sbt, locally on your machine:
+### My Sonatype staging repos seems to be in a broken state
+When a build is e.g. interrupted, or didn't satisfy the Sonatype requirements for publishing, it is likely that these artifacts are still lying around in the Sonatype staging area. You can log into https://oss.sonatype.org/ and clean it up, or just do it from within sbt, locally on your machine:
 
 * `sonatypeStagingRepositoryProfiles` // lists staging repo ids
 * `sonatypeDrop [id]`
