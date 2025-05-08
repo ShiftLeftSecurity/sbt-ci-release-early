@@ -7,8 +7,9 @@ Sbt plugin for fully automated releases, without SNAPSHOT and git sha's in the v
 
 - [Features](#features)
 - [Installation](#installation)
-- [Configuration for an in-house repository (e.g. jenkins/artifactory)](#configuration-for-an-in-house-repository-eg-jenkinsartifactory)
-- [Configuration for sonatype (maven central) via github actions](#configuration-for-sonatype-maven-central-via-github-actions)
+- [Tasks defined by this plugin:](#tasks-defined-by-this-plugin)
+- [Setup for a custom repository (e.g. jfrog artifactory)](#setup-for-a-custom-repository-eg-jfrog-artifactory)
+- [Setup for sonatype / maven central](#setup-for-sonatype--maven-central)
 - [Dependencies](#dependencies)
 - [FAQ](#faq)
 - [Alternatives](#alternatives)
