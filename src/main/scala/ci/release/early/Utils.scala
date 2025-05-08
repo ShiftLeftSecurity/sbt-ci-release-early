@@ -13,36 +13,51 @@ import versionsort.VersionHelper
 case class VersionAndTag(version: String, tag: String)
 
 object Utils {
+  val DefaultVersion = "0.1.0"
+
+  def getHeadCommitVersion(log: String => Any): Option[String] =
+    findHighestVersion(findTagsOnHead(), log)
+
+  def findTagsOnHead(): Seq[String] = {
+    val headId = repository.resolve(Constants.HEAD)
+    val headCommit = revWalk.parseCommit(headId)
+    val tags = git.tagList().call().asScala
+    val tagsOnHead = tags.filter { tagRef =>
+      val peeledRef = repository.peel(tagRef)
+      val peeledObjectId = peeledRef.getPeeledObjectId
+      val commitIdToCompare = if (peeledObjectId != null) peeledObjectId else tagRef.getObjectId
+      commitIdToCompare == headCommit.getId
+    }
+    tagsOnHead.map(tagRef => Repository.shortenRefName(tagRef.getName))
+  }
 
   def determineAndTagTargetVersion(log: String => Any): VersionAndTag = {
     verifyGitIsClean
-    val targetVersion = Utils.determineTargetVersion(log)
+    val targetVersion = determineTargetVersion(log)
     val tagName = s"v$targetVersion"
     tag(tagName, log)
     VersionAndTag(targetVersion, tagName)
   }
 
   def determineTargetVersion(log: String => Any): String = {
-    val allTags = git.tagList.call.asScala.map(_.getName).toList
-    val highestVersion = findHighestVersion(allTags, log)
-    log(s"highest version so far: $highestVersion")
-    val targetVersion = incrementVersion(highestVersion)
-    targetVersion
+    val tags = git.tagList.call.asScala.map(_.getName).toList
+    findHighestVersion(tags, log) match {
+      case Some(highestVersion) => 
+        log(s"highest version so far: $highestVersion")
+        incrementVersion(highestVersion)
+      case None => 
+        log(s"no tagged versions found in git, starting with $DefaultVersion")
+        DefaultVersion
+    }
   }
 
   /** based on git tags, derive the highest version */
-  def findHighestVersion(tags: List[String], log: String => Any): String = {
-    val taggedVersions = tags.collect {
-      case gitTagVersionRegex(version) => version
-    }
-
-    if (taggedVersions.isEmpty) {
-      val defaultVersion = "0.1.0"
-      log(s"no tagged versions found in git, starting with $defaultVersion")
-      defaultVersion
-    } else {
-      taggedVersions.sortWith { VersionHelper.compare(_, _) > 0 }.head
-    }
+  def findHighestVersion(tags: Seq[String], log: String => Any): Option[String] = {
+    val versionTags = tags.collect { case gitTagVersionRegex(version) => version }
+    if (versionTags.nonEmpty)
+      Option(versionTags.sortWith { VersionHelper.compare(_, _) > 0 }.head)
+    else
+      None
   }
 
   /* TODO allow to configure which part of the version should be incremented, e.g. via sbt.Task */
@@ -103,21 +118,8 @@ object Utils {
       """.stripMargin)
   }
 
-  def findTagsOnHead(): Seq[String] = {
-    val headId = repository.resolve(Constants.HEAD)
-    val headCommit = revWalk.parseCommit(headId)
-    val tags = git.tagList().call().asScala
-    val tagsOnHead = tags.filter { tagRef =>
-      val peeledRef = repository.peel(tagRef)
-      val peeledObjectId = peeledRef.getPeeledObjectId
-      val commitIdToCompare = if (peeledObjectId != null) peeledObjectId else tagRef.getObjectId
-      commitIdToCompare == headCommit.getId
-    }
-    tagsOnHead.map(tagRef => Repository.shortenRefName(tagRef.getName))
-  }
-
   lazy val git = new Git(new FileRepositoryBuilder().findGitDir(new File(".")).build)
   lazy val repository = git.getRepository
   lazy val revWalk = new RevWalk(repository)
-  lazy val gitTagVersionRegex = """refs/tags/v([0-9\.]+)""".r
+  lazy val gitTagVersionRegex = """^v([0-9\.a-zA-Z]+)""".r
 }
