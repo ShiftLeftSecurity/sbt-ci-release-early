@@ -25,20 +25,19 @@ Sbt plugin for fully automated releases, without SNAPSHOT and git sha's in the v
 
 ## Installation
 
-Add the dependency in your `projects/plugins.sbt`:
+`projects/plugins.sbt`:
 ```
 addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "<version>")
 ```
-
-Latest version: [![Scaladex](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)
-
-If you don't have any previous versions tagged in git, the plugin will automatically create a `v0.1.0` tag for you. Alternatively you can manually create an initial version tag (e.g. `git tag v0.0.1`) and the plugin will take it from there. The same applies if you want to use a different versioning scheme, e.g. `v1`, `v0.1` or `v0.0.0.1`. All that matters is that they must start with `v` (by convention).
 
 ## Tasks defined by this plugin:
 * `ciReleaseSkipIfAlreadyReleased`: check if your current HEAD commit already has a version tag. Invoke this at the beginning if you want to skip the other tasks in that case, to avoid releasing the same commit multiple times. Useful e.g. for daily builds. Affects all other tasks below.
 * `ciReleaseTagNextVersion`: determine the next version (by finding the highest version and incrementing the last digit), then create a tag with that version and push it
 * `ciRelease`: publish to the configured repository
 * `ciReleaseSonatype`: publish to sonatype (using a [patched version](https://github.com/xerial/sbt-sonatype/pull/591) of [sbt-sonatype](https://github.com/xerial/sbt-sonatype))
+
+> [!NOTE]
+> If you don't have any previous versions tagged in git, the plugin will automatically create a `v0.1.0` tag for you. Alternatively you can manually create an initial version tag (e.g. `git tag v0.0.1`) and the plugin will take it from there. The same applies if you want to use a different versioning scheme, e.g. `v1`, `v0.1` or `v0.0.0.1`. All that matters is that they must start with `v` (by convention).
 
 ## Setup for a custom repository (e.g. jfrog artifactory)
 In your `build.sbt`:
