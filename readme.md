@@ -5,23 +5,10 @@
 
 sbt plugin for fully automated releases, without SNAPSHOT and git sha's in the version. You can easily create e.g. daily or weekly releases, or even release every single commit on your main branch. A remix of [sbt-ci-release](https://github.com/olafurpg/sbt-ci-release) and [sbt-release-early](https://github.com/scalacenter/sbt-release-early/) with a spin.
 
-* detects last version from git tags (e.g. `v1.0.0`), and automatically tags and releases the next version as `v1.0.1`
-* no snapshots, no manual tagging
-* can be used in scheduled release jobs (can prevent duplicate releases if there haven't been any changes)
+* automatically tags and releases the next version, no manual tagging required
+* can be used in scheduled release jobs (no duplicate releases if there haven't been any changes)
 * for both maven central and custom repositories (e.g. jenkins/artifactory/nexus etc)
 * verifies that your build does not depend on any snapshot dependencies to prevent problems early on
-* automatically performs a cross-release if your build has multiple scala versions configured
-
-## TOC
-<!-- markdown-toc --maxdepth 1 --no-firsth1 readme.md | tail -n +2 -->
-- [Usage](#usage)
-- [Tasks defined by this plugin:](#tasks-defined-by-this-plugin)
-- [Setup for a custom repository (e.g. jfrog artifactory)](#setup-for-a-custom-repository-eg-jfrog-artifactory)
-- [Setup for sonatype / maven central](#setup-for-sonatype--maven-central)
-- [Dependencies](#dependencies)
-- [FAQ](#faq)
-- [Alternatives](#alternatives)
-
 
 ## Usage
 
@@ -30,8 +17,17 @@ sbt plugin for fully automated releases, without SNAPSHOT and git sha's in the v
 addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "<version>")
 ```
 
-## Tasks defined by this plugin:
-* `ciReleaseSkipIfAlreadyReleased`: check if your current HEAD commit already has a version tag. Invoke this at the beginning if you want to skip the other tasks in that case, to avoid releasing the same commit multiple times. Useful e.g. for daily builds. Affects all other tasks below.
+## TOC
+<!-- markdown-toc --maxdepth 1 --no-firsth1 readme.md | tail -n +3 -->
+- [Tasks](#tasks)
+- [Setup for a custom repository (e.g. jfrog artifactory)](#setup-for-a-custom-repository-eg-jfrog-artifactory)
+- [Setup for sonatype / maven central](#setup-for-sonatype--maven-central)
+- [Dependencies](#dependencies)
+- [FAQ](#faq)
+- [Alternatives](#alternatives)
+
+## Tasks
+* `ciReleaseSkipIfAlreadyReleased`: check if your current HEAD commit already has a version tag, and in that case skip the other `ciRelease*` tasks below. Useful e.g. for daily builds. 
 * `ciReleaseTagNextVersion`: determine the next version (by finding the highest version and incrementing the last digit), then create a tag with that version and push it
 * `ciRelease`: publish to the configured repository
 * `ciReleaseSonatype`: publish to sonatype (using a [patched version](https://github.com/xerial/sbt-sonatype/pull/591) of [sbt-sonatype](https://github.com/xerial/sbt-sonatype))
@@ -40,20 +36,18 @@ addSbtPlugin("io.shiftleft" % "sbt-ci-release-early" % "<version>")
 > If you don't have any previous versions tagged in git, the plugin will automatically create a `v0.1.0` tag for you. Alternatively you can manually create an initial version tag (e.g. `git tag v0.0.1`) and the plugin will take it from there. The same applies if you want to use a different versioning scheme, e.g. `v1`, `v0.1` or `v0.0.0.1`. All that matters is that they must start with `v` (by convention).
 
 ## Setup for a custom repository (e.g. jfrog artifactory)
-In your `build.sbt`:
-* do *not* define the `version` setting
-* configure your repository in the `publishTo` setting:
+In your `build.sbt` do *not* define the `version` setting, and configure your repository in the `publishTo` setting:
 ```
 ThisBuild/publishTo := Some("releases" at "https://shiftleft.jfrog.io/shiftleft/libs-release-local")
 ```
 
 In your release pipeline run:
 ```
-sbt ciReleaseTagNextVersion ciRelease
+sbt ciReleaseSkipIfAlreadyReleased ciReleaseTagNextVersion ciRelease
 ```
 
 > [!NOTE]
-> cross builds (for multiple scala versions) work seamlessly (the plugin just calls `+publishSigned`). 
+> cross builds (for multiple scala versions) work seamlessly (the plugin just calls `+publishSigned`)
 
 ## Setup for sonatype / maven central
 Sonatype central (which syncs to maven central) imposes additional constraints on the published artifacts, so the setup becomes a little more involved. These steps assume you're using github actions, but it'd be similar on other build servers. 
@@ -62,9 +56,7 @@ Sonatype central (which syncs to maven central) imposes additional constraints o
 If you don't have a sonatype account yet, follow the instructions in https://central.sonatype.org/pages/ossrh-guide.html to create one.
 
 ### build.sbt
-In your `build.sbt`:
-* do *not* define the `version` setting
-* ensure the following settings *are* defined in your `build.sbt`:
+In your `build.sbt` do *not* define the `version` setting and ensure the following settings *are* configured:
 - `name`
 - `organization`: must match your sonatype account
 - `licenses`
@@ -77,14 +69,7 @@ Example: https://github.com/mpollmeier/sbt-ci-release-early-usage/blob/master/bu
 For a multi-project build, you can define those settings in your root `build.sbt` and prefix them with `ThisBuild/`, e.g. `ThisBuild/publishTo := sonatypePublishToBundle.value`
 
 > [!WARNING]
-> Sonatype hostname
->
-> By default, sbt-sonatype is configured to use the legacy Sonatype repository `oss.sonatype.org`. If you created a new account from February 2021, you need to configure the new repository url. Context: https://github.com/xerial/sbt-sonatype/issues/214
->
-> ```scala
-> // For all Sonatype accounts created from February 2021
-> sonatypeCredentialHost := "s01.oss.sonatype.org"
-> ```
+> By default, sbt-sonatype uses the legacy Sonatype repository `oss.sonatype.org`. If you created your after February 2021, you probably need to configure the new repository url via `sonatypeCredentialHost := "s01.oss.sonatype.org"`.
 
 ### gitignore
 `echo '/gnupg-*' >> .gitignore`
@@ -175,20 +160,16 @@ jobs:
   pr:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 1
-      - name: Set up JDK 11
-        uses: actions/setup-java@v2
+      - name: Setup JDK
+        uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: 11
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.sbt
-            ~/.coursier
-          key: ${{ runner.os }}-sbt-${{ hashfiles('**/build.sbt') }}
+          distribution: temurin
+          java-version: 21
+          cache: sbt
+      - uses: sbt/setup-sbt@v1
       - run: sbt +test
 ```
 
@@ -204,31 +185,25 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Set up JDK 11
-        uses: actions/setup-java@v2
+      - name: Setup JDK
+        uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: 11
+          distribution: temurin
+          java-version: 21
+          cache: sbt
+      - uses: sbt/setup-sbt@v1
       - run: sudo apt update && sudo apt install -y gnupg
       - run: echo $PGP_SECRET | base64 --decode | gpg --batch --import
         env:
           PGP_SECRET: ${{ secrets.PGP_SECRET }}
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.sbt
-            ~/.coursier
-          key: ${{ runner.os }}-sbt-${{ hashfiles('**/build.sbt') }}
-      - run: sbt +test ciReleaseTagNextVersion ciReleaseSonatype
+      - run: sbt +test ciReleaseSkipIfAlreadyReleased ciReleaseTagNextVersion ciReleaseSonatype
         env:
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
 ```
-
-If you want to customize those: the syntax is [documented here](https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions).
 
 That's all. Here's a demo repo: https://github.com/mpollmeier/sbt-ci-release-early-usage
 
