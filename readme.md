@@ -69,7 +69,7 @@ Example: https://github.com/mpollmeier/sbt-ci-release-early-usage/blob/master/bu
 For a multi-project build, you can define those settings in your root `build.sbt` and prefix them with `ThisBuild/`, e.g. `ThisBuild/publishTo := sonatypePublishToBundle.value`
 
 > [!WARNING]
-> By default, sbt-sonatype uses the legacy Sonatype repository `oss.sonatype.org`. If you created your after February 2021, you probably need to configure the new repository url via `sonatypeCredentialHost := "s01.oss.sonatype.org"`.
+> By default, sbt-sonatype uses the legacy Sonatype repository `oss.sonatype.org`. If you created yours after February 2021, you probably need to configure the new repository url via `sonatypeCredentialHost := "s01.oss.sonatype.org"`.
 
 ### gitignore
 `echo '/gnupg-*' >> .gitignore`
