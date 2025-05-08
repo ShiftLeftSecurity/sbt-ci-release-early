@@ -3,19 +3,8 @@
 [![Build Status](https://github.com/ShiftLeftSecurity/sbt-ci-release-early/workflows/release/badge.svg)](https://github.com/ShiftLeftSecurity/sbt-ci-release-early/actions?query=workflow%3Arelease)
 [![Scaladex](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)](https://index.scala-lang.org/ShiftLeftSecurity/sbt-ci-release-early/latest.svg)
 
-Sbt plugin for fully automated releases, without SNAPSHOT and git sha's in the version. A remix of the best ideas from [sbt-ci-release](https://github.com/olafurpg/sbt-ci-release) and [sbt-release-early](https://github.com/scalacenter/sbt-release-early/).
+sbt plugin for fully automated releases, without SNAPSHOT and git sha's in the version. You can easily create e.g. daily or weekly releases, or even release every single commit on your main branch. A remix of [sbt-ci-release](https://github.com/olafurpg/sbt-ci-release) and [sbt-release-early](https://github.com/scalacenter/sbt-release-early/) with a spin.
 
-- [Features](#features)
-- [Installation](#installation)
-- [Tasks defined by this plugin:](#tasks-defined-by-this-plugin)
-- [Setup for a custom repository (e.g. jfrog artifactory)](#setup-for-a-custom-repository-eg-jfrog-artifactory)
-- [Setup for sonatype / maven central](#setup-for-sonatype--maven-central)
-- [Dependencies](#dependencies)
-- [FAQ](#faq)
-- [Alternatives](#alternatives)
-<!-- markdown-toc --maxdepth 1 --no-firsth1 readme.md -->
-
-## Features
 * detects last version from git tags (e.g. `v1.0.0`), and automatically tags and releases the next version as `v1.0.1`
 * no snapshots, no manual tagging
 * can be used in scheduled release jobs (can prevent duplicate releases if there haven't been any changes)
@@ -23,7 +12,18 @@ Sbt plugin for fully automated releases, without SNAPSHOT and git sha's in the v
 * verifies that your build does not depend on any snapshot dependencies to prevent problems early on
 * automatically performs a cross-release if your build has multiple scala versions configured
 
-## Installation
+## TOC
+<!-- markdown-toc --maxdepth 1 --no-firsth1 readme.md | tail -n +2 -->
+- [Usage](#usage)
+- [Tasks defined by this plugin:](#tasks-defined-by-this-plugin)
+- [Setup for a custom repository (e.g. jfrog artifactory)](#setup-for-a-custom-repository-eg-jfrog-artifactory)
+- [Setup for sonatype / maven central](#setup-for-sonatype--maven-central)
+- [Dependencies](#dependencies)
+- [FAQ](#faq)
+- [Alternatives](#alternatives)
+
+
+## Usage
 
 `projects/plugins.sbt`:
 ```
@@ -133,7 +133,8 @@ gpg --keyserver keyserver.ubuntu.com --send-keys $LONG_ID
 ### Secrets to share with Github actions
 So that Github Actions can release on your behalf, we need to share some secrets via environment variables with github actions. You can either do that for your project or an entire organization. 
 
-  > ⚠️ As of June 2024 Sonatype requires to log in with an access token, you can no longer use your regular username/password. 
+> [!NOTE]
+> As of June 2024 Sonatype requires to log in with an access token, you can no longer use your regular username/password. 
   
 First you need to obtain a sonatype username/password token: 
 - log into https://oss.sonatype.org
