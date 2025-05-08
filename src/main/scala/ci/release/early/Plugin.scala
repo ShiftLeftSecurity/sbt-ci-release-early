@@ -15,6 +15,7 @@ import xerial.sbt.Sonatype.autoImport.sonatypePublishToBundle
 object Plugin extends AutoPlugin {
   object autoImport {
     val verifyNoSnapshotDependencies = taskKey[Unit]("Verify there are no snapshot dependencies (fail otherwise)")
+    val ciReleaseSkip = settingKey[Boolean]("skip the release - set to `true` by `ciReleaseSkipIfAlreadyReleased` if the current HEAD is already released, and read by the other steps")
   }
   import autoImport._
 
@@ -28,26 +29,55 @@ object Plugin extends AutoPlugin {
      * - didn't know how to update the version within the task
      * - didn't figure out how to automatically cross-build without lot's of extra code
     */
+    commands += Command.command("ciReleaseSkipIfAlreadyReleased") { state =>
+      def log(msg: String) = sLog.value.info(msg)
+      Utils.getHeadCommitVersion(log) match {
+        case Some(versionTag) => 
+          log(s"HEAD is already tagged with a version tag ($versionTag) - setting `ciReleaseSkip := true` so that all other steps will be skipped")
+          "set ciReleaseSkip := true" :: state
+        case None =>
+          log("HEAD does not yet have a version tag - all good")
+          state
+      }
+    },
     commands += Command.command("ciReleaseTagNextVersion") { state =>
       def log(msg: String) = sLog.value.info(msg)
-      val tag = Utils.determineAndTagTargetVersion(log).tag
-      Utils.push(tag, log)
-      sLog.value.info("reloading sbt so that sbt-dynver will set the `version`" +
-        s" setting based on the git tag ($tag)")
-      "verifyNoSnapshotDependencies" :: "reload" :: state
-      },
+      if (shouldSkip(state)) {
+        log("ciReleaseTagNextVersion: skipped")
+        state
+      } else {
+        val tag = Utils.determineAndTagTargetVersion(log).tag
+        Utils.push(tag, log)
+        log(s"created and pushed $tag")
+        log(s"reloading sbt so that sbt-dynver will set the `version` setting based on the git tag ($tag)")
+        "verifyNoSnapshotDependencies" :: "reload" :: state
+      }
+    },
     commands += Command.command("ciRelease") { state =>
-      sLog.value.info("Running ciRelease")
-      "verifyNoSnapshotDependencies" :: "+publish" :: state
+      def log(msg: String) = sLog.value.info(msg)
+      if (shouldSkip(state)) {
+        log("ciRelease: skipped")
+        state
+      } else {
+        log("Running ciRelease")
+        "verifyNoSnapshotDependencies" :: "+publish" :: state
+      }
     },
     commands += Command.command("ciReleaseSonatype") { state =>
-      sLog.value.info("Running ciReleaseSonatype")
-      "verifyNoSnapshotDependencies" ::
-        "clean" ::
-        "sonatypeBundleClean" ::
-        "+publishSigned" ::
-        "sonatypeBundleRelease" ::
+      def log(msg: String) = sLog.value.info(msg)
+      if (shouldSkip(state)) {
+        log("ciReleaseSonatype: skipped")
         state
+      } else {
+        log("Running ciReleaseSonatype")
+        "verifyNoSnapshotDependencies" ::
+          "clean" ::
+          "sonatypeBundleClean" ::
+          "+publishSigned" ::
+          "sonatypeBundleRelease" ::
+          "ciReleasePushTag" ::
+          state
+      }
     },
   )
 
@@ -60,10 +90,17 @@ object Plugin extends AutoPlugin {
   def isGitlab: Boolean =
     System.getenv("GITLAB_CI") == "true"
 
+  /** lookup the value of the `ciReleaseSkip` setting */
+  def shouldSkip(state: State): Boolean = {
+    val extracted = Project.extract(state)
+    (extracted.currentRef / ciReleaseSkip).get(extracted.structure.data).getOrElse(false)
+  }
+
   override def trigger = allRequirements
 
   override lazy val projectSettings = Seq(
-    verifyNoSnapshotDependencies := verifyNoSnapshotDependenciesTask.value
+    verifyNoSnapshotDependencies := verifyNoSnapshotDependenciesTask.value,
+    ciReleaseSkip := false,
   )
 
   lazy val verifyNoSnapshotDependenciesTask = Def.task {
