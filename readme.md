@@ -120,7 +120,7 @@ gpg --keyserver keyserver.ubuntu.com --send-keys $LONG_ID
 So that Github Actions can release on your behalf, we need to share some secrets via environment variables with github actions. You can either do that for your project or an entire organization. 
 
 > [!NOTE]
-> As of June 2024 Sonatype requires you to log in with an access token, you can no longer use your regular username/password. 
+> As of June 2024, Sonatype requires you to log in with an access token, you can no longer use your regular username/password. 
   
 First you need to obtain a Sonatype username/password token: 
 - log into https://oss.sonatype.org
