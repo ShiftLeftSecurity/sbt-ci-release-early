@@ -265,7 +265,7 @@ Otherwise you can just append `subProjectName/publish` to your build pipeline, t
 
 ### Can I use my releases immediately?
 
-As soon as sonatype "closes" the staging repository they are available on sonatype/releases and will be synchronized to maven central within ~10mins. If you want to use them immediately, add a sonatype resolver to the build that uses the released artifact:
+As soon as Sonatype "closes" the staging repository they become available on Sonatype/releases and will be synchronized to maven central within ~10mins. If you want to use them immediately, add a Sonatype resolver to the build that uses the released artifact:
 
 ```scala
 resolvers += Resolver.sonatypeRepo("releases")
