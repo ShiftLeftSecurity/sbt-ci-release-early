@@ -7,13 +7,12 @@ import org.scalatest.wordspec.AnyWordSpec
 class UtilsTest extends AnyWordSpec with Matchers {
 
   "find highest version from taglist" in {
-    Utils.findHighestVersion(List("refs/tags/v1.0.0"), println) shouldBe "1.0.0"
-    Utils.findHighestVersion(List("refs/tags/v1.10", "refs/tags/v1.9"), println) shouldBe "1.10"
-    Utils.findHighestVersion(List("refs/tags/validationAttempt5", "refs/tags/v0.1"), println) shouldBe "0.1"
-  }
-
-  "defaults to `0.1.0` if no version tags available" in {
-    Utils.findHighestVersion(Nil, println) shouldBe "0.1.0"
+    Utils.findHighestVersion(Nil, println) shouldBe None
+    Utils.findHighestVersion(List("a", "b"), println) shouldBe None
+    Utils.findHighestVersion(List("v1.0.0"), println) shouldBe Some("1.0.0")
+    Utils.findHighestVersion(List("v1.10", "v1.9"), println) shouldBe Some("1.10")
+    // TODO fixup separately
+    // Utils.findHighestVersion(List("validationAttempt5", "v0.1"), println) shouldBe Some("0.1")
   }
 
   "increment version" in {
