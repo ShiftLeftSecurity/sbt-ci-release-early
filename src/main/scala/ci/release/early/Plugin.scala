@@ -75,7 +75,6 @@ object Plugin extends AutoPlugin {
           "sonatypeBundleClean" ::
           "+publishSigned" ::
           "sonatypeBundleRelease" ::
-          "ciReleasePushTag" ::
           state
       }
     },
