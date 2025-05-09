@@ -32,4 +32,9 @@ class UtilsTest extends AnyWordSpec with Matchers {
       .get shouldBe s"https://${token}@github.com/user/repo.git"
   }
 
+  "git tag regex matches full and short version tags" in {
+    Utils.gitTagVersionRegex.unapplySeq("v0.1.0") shouldBe Some(Seq("0.1.0"))
+    Utils.gitTagVersionRegex.unapplySeq("refs/tags/v0.1.1") shouldBe Some(Seq("0.1.1"))
+  }
+
 }

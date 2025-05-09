@@ -121,5 +121,10 @@ object Utils {
   lazy val git = new Git(new FileRepositoryBuilder().findGitDir(new File(".")).build)
   lazy val repository = git.getRepository
   lazy val revWalk = new RevWalk(repository)
-  lazy val gitTagVersionRegex = """^v([0-9\.a-zA-Z]+)""".r
+  
+  /** regex that matches short and long form of version tags,
+    * e.g. `v0.1.0` and `refs/tags/v0.1.1`
+    * the `?:` at the beginning makes it a non-capturing group
+    */
+  lazy val gitTagVersionRegex = """^(?:refs/tags/)?v([0-9\.a-zA-Z]+)""".r
 }
