@@ -73,9 +73,9 @@ For a multi-project build, you can define those settings in your root `build.sbt
 ### Choosing the correct Sonatype host
 Unfortunately there's been a few changes re sonatype hosts, leading to confusion. You will need to configure the `sonatypeCredentialHost` setting according to the sonatype host your account is on. If you're unsure, you'll need to test them individually, but here's a rough guideline:
 
-- `sonatypeCredentialHost := "central.sonatype.com"` - if you are on Sonatype Central
-- `sonatypeCredentialHost := "oss.sonatype.org"` - the sonatype legacy OSSRH host
-- `sonatypeCredentialHost := "s01.oss.sonatype.org"` - the sonatype legacy OSSRH host, for accounts created after February 2021
+- `ThisBuild/sonatypeCredentialHost := "central.sonatype.com"` - if you are on Sonatype Central
+- `ThisBuild/sonatypeCredentialHost := "oss.sonatype.org"` - the sonatype legacy OSSRH host
+- `ThisBuild/sonatypeCredentialHost := "s01.oss.sonatype.org"` - the sonatype legacy OSSRH host, for accounts created after February 2021
  
 > [!NOTE] The legacy OSSRH service will sunset on June 30th, 2025, i.e. you will need to migrate to Sonatype Central after that. See https://central.sonatype.org/publish/publish-guide
 
