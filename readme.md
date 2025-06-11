@@ -65,12 +65,19 @@ In your `build.sbt` do *not* define the `version` setting and ensure the followi
 - `scmInfo`
 - `homepage`
 - `publishTo := sonatypePublishToBundle.value`
+- `sonatypeCredentialHost` potentially - see next section
 
 Example: https://github.com/mpollmeier/sbt-ci-release-early-usage/blob/master/build.sbt
 For a multi-project build, you can define those settings in your root `build.sbt` and prefix them with `ThisBuild/`, e.g. `ThisBuild/publishTo := sonatypePublishToBundle.value`
 
-> [!WARNING]
-> By default, sbt-sonatype uses the legacy Sonatype repository `oss.sonatype.org`. If you created yours after February 2021, you probably need to configure the new repository url via `sonatypeCredentialHost := "s01.oss.sonatype.org"`.
+### Choosing the correct Sonatype host
+Unfortunately there's been a few changes re sonatype hosts, leading to confusion. You will need to configure the `sonatypeCredentialHost` setting according to the sonatype host your account is on. If you're unsure, you'll need to test them individually, but here's a rough guideline:
+
+- `sonatypeCredentialHost := "central.sonatype.com"` - if you are on Sonatype Central
+- `sonatypeCredentialHost := "oss.sonatype.org"` - the sonatype legacy OSSRH host
+- `sonatypeCredentialHost := "s01.oss.sonatype.org"` - the sonatype legacy OSSRH host, for accounts created after February 2021
+ 
+> [!NOTE] The legacy OSSRH service will sunset on June 30th, 2025, i.e. you will need to migrate to Sonatype Central after that. See https://central.sonatype.org/publish/publish-guide
 
 ### gitignore
 `echo '/gnupg-*' >> .gitignore`
