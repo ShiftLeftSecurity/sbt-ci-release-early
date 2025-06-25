@@ -77,7 +77,8 @@ Unfortunately there's been a few changes re sonatype hosts, leading to confusion
 - `ThisBuild/sonatypeCredentialHost := "oss.sonatype.org"` - the sonatype legacy OSSRH host
 - `ThisBuild/sonatypeCredentialHost := "s01.oss.sonatype.org"` - the sonatype legacy OSSRH host, for accounts created after February 2021
  
-> [!IMPORTANT] The legacy OSSRH service will sunset on June 30th, 2025, i.e. you will need to migrate to [Sonatype Central](https://central.sonatype.com/publishing/namespaces) after that, i.e. register an account and migrate your existing OSSRH account there, following the [migration guide](https://central.sonatype.org/faq/what-is-different-between-central-portal-and-legacy-ossrh/#self-service-migration). See also https://central.sonatype.org/publish/publish-guide
+> [!IMPORTANT]
+> The legacy OSSRH service will sunset on June 30th, 2025, i.e. you will need to migrate to [Sonatype Central](https://central.sonatype.com/publishing/namespaces) after that, i.e. register an account and migrate your existing OSSRH account there, following the [migration guide](https://central.sonatype.org/faq/what-is-different-between-central-portal-and-legacy-ossrh/#self-service-migration). See also https://central.sonatype.org/publish/publish-guide
 
 ### gitignore
 `echo '/gnupg-*' >> .gitignore`
