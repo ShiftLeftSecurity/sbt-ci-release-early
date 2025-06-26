@@ -53,8 +53,8 @@ sbt ciReleaseSkipIfAlreadyReleased ciReleaseTagNextVersion ciRelease
 ## Setup for Sonatype / Maven central
 Sonatype central (which syncs to maven central) imposes additional constraints on the published artifacts, so the setup becomes a little more involved. These steps assume you're using github actions, but it'd be similar on other build servers. 
 
-### Sonatype account
-If you don't have a Sonatype account yet, follow the instructions in https://central.sonatype.org/pages/ossrh-guide.html to create one.
+### Sonatype central account
+If you don't have a Sonatype account yet, follow the instructions in https://central.sonatype.org/register/central-portal/ to create one.
 
 ### build.sbt
 In your `build.sbt` do *not* define the `version` setting and ensure the following settings *are* configured:
@@ -125,17 +125,15 @@ gpg --keyserver keyserver.ubuntu.com --send-keys $LONG_ID
 ```
 
 ### Secrets to share with Github actions
-So that Github Actions can release on your behalf, we need to share some secrets via environment variables with github actions. You can either do that for your project or an entire organization. 
+So that Github Actions can release on your behalf, we need to share some secrets via environment variables with github actions. You can either do that for your project or an entire organization. Sonatype requires you to authorize your deployment artifacts with an access token, which you can get retrieve from sonatype and share with github actions as follows:
 
-> [!NOTE]
-> As of June 2024, Sonatype requires you to log in with an access token, you can no longer use your regular username/password. 
-  
-First you need to obtain a Sonatype username/password token: 
-- log into https://oss.sonatype.org
-- select `Profile` from the dropdown at the top right
-- `User Token` -> `Access` -> `Access user token`
+- sign into https://central.sonatype.com
+- go to https://central.sonatype.com/account (or click on `Av` at the top right and navigate to `Account`)
+- Generate a user token and save it somewhere
 
-Now go to your github project or organization and navigate to `Settings` -> `Secrets and variables` -> `Actions` and add the following `Repository secrets`:
+Now you can share those for your entire github organization's github actions or only for a single project as follows:
+- navigate to your project or organization on github
+- `Settings` -> `Secrets and variables` -> `Actions` and add the following `Repository secrets`:
 - `SONATYPE_USERNAME`: the name part of the user token you generated in the previous step
 - `SONATYPE_PASSWORD`: the password part of the user token you generated in the previous step
 - `PGP_SECRET`: The base64 encoded secret of your private key that you can export from the command line like here below
@@ -233,7 +231,7 @@ git ls-remote --tags $REPO | awk -F"/" '{print $3}' | grep '^v[0-9]*\.[0-9]*\.[0
 ```
 
 ### My Sonatype staging repos seems to be in a broken state
-When a build is e.g. interrupted, or didn't satisfy the Sonatype requirements for publishing, it is likely that these artifacts are still lying around in the Sonatype staging area. You can log into https://oss.sonatype.org/ and clean it up, or just do it from within sbt, locally on your machine:
+When a build is e.g. interrupted, or didn't satisfy the Sonatype requirements for publishing, it is likely that these artifacts are still lying around in the Sonatype staging area. You can log into https://central.sonatype.com/ and clean it up, or just do it from within sbt, locally on your machine:
 
 * `sonatypeStagingRepositoryProfiles` // lists staging repo ids
 * `sonatypeDrop [id]`
