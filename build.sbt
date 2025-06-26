@@ -11,7 +11,7 @@ libraryDependencies ++= List(
 
 addSbtPlugin("com.github.sbt" % "sbt-dynver" % "5.1.0")
 addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.3.0")
-// TODO back to official release once our PR is merged and released:
+// TODO back to official release once our PR is released (probably as 3.13.0 or 3.13.3)
 // https://github.com/xerial/sbt-sonatype/pull/591
 // addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.12.2")
 addSbtPlugin("com.michaelpollmeier" % "sbt-sonatype" % "3.12.2-18-2c83e453") 
