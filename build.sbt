@@ -35,3 +35,5 @@ developers := List(
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 publishTo := sonatypePublishToBundle.value
+ThisBuild/sonatypeCredentialHost := "central.sonatype.com"
+
