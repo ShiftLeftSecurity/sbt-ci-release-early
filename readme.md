@@ -65,20 +65,15 @@ In your `build.sbt` do *not* define the `version` setting and ensure the followi
 - `scmInfo`
 - `homepage`
 - `publishTo := sonatypePublishToBundle.value`
-- `sonatypeCredentialHost` potentially - see next section
+- `sonatypeCredentialHost := "central.sonatype.com"`
 
 Example: https://github.com/mpollmeier/sbt-ci-release-early-usage/blob/master/build.sbt
-For a multi-project build, you can define those settings in your root `build.sbt` and prefix them with `ThisBuild/`, e.g. `ThisBuild/publishTo := sonatypePublishToBundle.value`
 
-### Choosing the correct Sonatype host
-Unfortunately there's been a few changes re sonatype hosts, leading to confusion. You will need to configure the `sonatypeCredentialHost` setting according to the sonatype host your account is on. If you're unsure, you'll need to test them individually, but here's a rough guideline:
+> [!NOTE]
+> For a multi-project build, you likely want to define those settings in your root `build.sbt` and prefix them with `ThisBuild/`, e.g. `ThisBuild/publishTo := sonatypePublishToBundle.value`. That way they'll apply to all subprojects. 
 
-- `ThisBuild/sonatypeCredentialHost := "central.sonatype.com"` - if you are on Sonatype Central
-- `ThisBuild/sonatypeCredentialHost := "oss.sonatype.org"` - the sonatype legacy OSSRH host
-- `ThisBuild/sonatypeCredentialHost := "s01.oss.sonatype.org"` - the sonatype legacy OSSRH host, for accounts created after February 2021
- 
 > [!IMPORTANT]
-> The legacy OSSRH service will sunset on June 30th, 2025, i.e. you will need to migrate to [Sonatype Central](https://central.sonatype.com/publishing/namespaces) after that, i.e. register an account and migrate your existing OSSRH account there, following the [migration guide](https://central.sonatype.org/faq/what-is-different-between-central-portal-and-legacy-ossrh/#self-service-migration). See also https://central.sonatype.org/publish/publish-guide
+> Sonatype's OSSRH service [has been shut down on June 30th, 2025](https://central.sonatype.org/pages/ossrh-eol/). If you haven't already done so, you will need to register an account and migrate your existing OSSRH account over to central, following the [migration guide](https://central.sonatype.org/faq/what-is-different-between-central-portal-and-legacy-ossrh/#self-service-migration).
 
 ### gitignore
 `echo '/gnupg-*' >> .gitignore`
