@@ -22,7 +22,7 @@ object Utils {
     val headCommit = revWalk.parseCommit(headId)
     val tags = CollectionConversions.toScala(git.tagList().call())
     val tagsOnHead = tags.filter { tagRef =>
-      val peeledRef = repository.peel(tagRef)
+      val peeledRef = repository.getRefDatabase.peel(tagRef)
       val peeledObjectId = peeledRef.getPeeledObjectId
       val commitIdToCompare = if (peeledObjectId != null) peeledObjectId else tagRef.getObjectId
       commitIdToCompare == headCommit.getId
