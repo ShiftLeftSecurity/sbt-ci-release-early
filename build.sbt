@@ -36,6 +36,7 @@ developers := List(
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
+ThisBuild / sonatypeCredentialHost := "central.sonatype.com"
 ThisBuild / publishTo := {
   val centralSnapshots = "https://central.sonatype.com/repository/maven-snapshots/"
   if (isSnapshot.value) Some("central-snapshots" at centralSnapshots)
