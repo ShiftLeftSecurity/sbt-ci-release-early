@@ -25,8 +25,8 @@ class UtilsTest extends AnyWordSpec with Matchers {
 
   "interweave github token into repository url" in {
     val token = "abc"
-    Utils.interweaveGithubToken(token, repoUri = "not-a-uri") shouldBe 'failure
-    Utils.interweaveGithubToken(token, repoUri = "git@github.com:not-an-http-uri.git") shouldBe 'failure
+    Utils.interweaveGithubToken(token, repoUri = "not-a-uri") shouldBe Symbol("failure")
+    Utils.interweaveGithubToken(token, repoUri = "git@github.com:not-an-http-uri.git") shouldBe Symbol("failure")
 
     Utils.interweaveGithubToken(token, repoUri = "https://github.com/user/repo.git")
       .get shouldBe s"https://${token}@github.com/user/repo.git"
