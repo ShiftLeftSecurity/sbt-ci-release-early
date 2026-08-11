@@ -2,15 +2,10 @@ package ci.release.early
 
 import com.jsuereth.sbtpgp.SbtPgp
 import sbtdynver.DynVerPlugin
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.util.Base64
 import sbt._
 import sbt.plugins.JvmPlugin
 import sbt.Keys._
 import scala.sys.process._
-import xerial.sbt.Sonatype
-import xerial.sbt.Sonatype.autoImport.sonatypePublishToBundle
 
 object Plugin extends AutoPlugin {
   object autoImport {
@@ -20,9 +15,9 @@ object Plugin extends AutoPlugin {
   import autoImport._
 
   override def requires =
-    JvmPlugin && SbtPgp && DynVerPlugin && Sonatype
+    JvmPlugin && SbtPgp && DynVerPlugin
 
-  override def globalSettings: Seq[Def.Setting[_]] = List(
+  override def globalSettings: Seq[Def.Setting[?]] = List(
     Test/publishArtifact := false,
     publishMavenStyle := true,
     /* I tried to define these commands as tasks, but had the following errors:
@@ -72,9 +67,8 @@ object Plugin extends AutoPlugin {
         log("Running ciReleaseSonatype")
         "verifyNoSnapshotDependencies" ::
           "clean" ::
-          "sonatypeBundleClean" ::
           "+publishSigned" ::
-          "sonatypeBundleRelease" ::
+          "sonaRelease" ::
           state
       }
     },
@@ -103,8 +97,7 @@ object Plugin extends AutoPlugin {
   )
 
   lazy val verifyNoSnapshotDependenciesTask = Def.task {
-    val moduleIds = (Runtime/managedClasspath).value.flatMap(_.get(moduleID.key))
-    val snapshots = moduleIds.filter(m => m.isChanging || m.revision.endsWith("-SNAPSHOT")).toList
+    val snapshots = update.value.allModules.filter(m => m.isChanging || m.revision.endsWith("-SNAPSHOT")).toList
     assert(snapshots.size == 0, s"expected 0 snapshot dependencies, but found: $snapshots")
   }
 }
