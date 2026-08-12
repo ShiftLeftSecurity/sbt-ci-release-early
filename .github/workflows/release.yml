@@ -23,7 +23,7 @@ jobs:
       - name: Build, test and tag
         run: sbt -v clean +test ciReleaseTagNextVersion
       - name: Deploy to Maven Central
-        run: sbt -v +ciReleaseSonatype
+        run: sbt -v ciReleaseSonatype
         env:
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
