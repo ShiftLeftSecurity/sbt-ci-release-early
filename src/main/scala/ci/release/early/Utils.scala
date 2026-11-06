@@ -5,6 +5,7 @@ import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.{Constants, Repository}
 import org.eclipse.jgit.revwalk.RevWalk
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+import scala.jdk.CollectionConverters.*
 import scala.util.Try
 import sys.process._
 import versionsort.VersionHelper
@@ -20,7 +21,7 @@ object Utils {
   def findTagsOnHead(): Seq[String] = {
     val headId = repository.resolve(Constants.HEAD)
     val headCommit = revWalk.parseCommit(headId)
-    val tags = CollectionConversions.toScala(git.tagList().call())
+    val tags = git.tagList().call().asScala.toSeq
     val tagsOnHead = tags.filter { tagRef =>
       val peeledRef = repository.getRefDatabase.peel(tagRef)
       val peeledObjectId = peeledRef.getPeeledObjectId
@@ -39,7 +40,7 @@ object Utils {
   }
 
   def determineTargetVersion(log: String => Any): String = {
-    val tags = CollectionConversions.toScala(git.tagList.call).map(_.getName).toList
+    val tags = git.tagList.call.asScala.toSeq.map(_.getName).toList
     findHighestVersion(tags, log) match {
       case Some(highestVersion) => 
         log(s"highest version so far: $highestVersion")
@@ -76,7 +77,7 @@ object Utils {
     /* couldn't get jgit to push it to the remote... falling back to installed version of git
      * jgit error: `There are not any available sig algorithm`... no idea */
     val remoteUri: String = {
-      val remotes = CollectionConversions.toScala(git.remoteList.call)
+      val remotes = git.remoteList.call.asScala.toSeq
       assert(remotes.size == 1, "we currently only support repos that have _one_ remote configured, sorry")
       val uri = remotes.head.getURIs.get(0).toString
       log(s"pushing $tagName to $uri")
