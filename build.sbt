@@ -2,15 +2,10 @@ moduleName := "sbt-ci-release-early"
 organization := "io.shiftleft"
 sbtPlugin := true
 
-crossScalaVersions := Seq("2.12.20", "3.8.3")
-scalaVersion := "2.12.20"
+scalaVersion := "3.9.0"
 
-(pluginCrossBuild / sbtVersion) := {
-  scalaBinaryVersion.value match {
-    case "2.12" => "1.12.15"
-    case _      => "2.0.6"
-  }
-}
+// sbt 2.1.x uses Scala 3.9.x for the metabuild, so plugins built with 3.9 are not compatible with sbt 2.0.x
+pluginCrossBuild / sbtVersion := "2.1.0"
 
 libraryDependencies ++= List(
   "org.eclipse.jgit" % "org.eclipse.jgit" % "5.13.3.202401111512-r", // do not upgrade to 6.x unless you're willing to give up java 8 compatibility
@@ -18,27 +13,26 @@ libraryDependencies ++= List(
   "org.scalatest" %% "scalatest" % "3.2.19" % Test)
 
 addSbtPlugin("com.github.sbt" % "sbt-dynver" % "5.1.1")
-addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.3.1")
+addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.3.2") // >= 2.3.2 is required for sbt 2.1 (2.3.1 depends on Ivy)
 
-homepage := Some(url("https://github.com/ShiftLeftSecurity/sbt-ci-release-early"))
+homepage := Some(uri("https://github.com/ShiftLeftSecurity/sbt-ci-release-early"))
 scmInfo := Some(ScmInfo(
-  url("https://github.com/ShiftLeftSecurity/sbt-ci-release-early"),
+  uri("https://github.com/ShiftLeftSecurity/sbt-ci-release-early"),
   "scm:git@github.com:ShiftLeftSecurity/sbt-ci-release-early.git"))
-licenses := Seq("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
+licenses := Seq("Apache-2.0" -> uri("http://www.apache.org/licenses/LICENSE-2.0"))
 developers := List(
   Developer(
     "mpollmeier",
     "Michael Pollmeier",
     "michael@michaelpollmeier.com",
-    url("https://michaelpollmeier.com")
+    uri("https://michaelpollmeier.com")
   )
 )
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-ThisBuild / sonatypeCredentialHost := "central.sonatype.com"
 ThisBuild / publishTo := {
   val centralSnapshots = "https://central.sonatype.com/repository/maven-snapshots/"
   if (isSnapshot.value) Some("central-snapshots" at centralSnapshots)
-  else sonatypePublishToBundle.value
+  else localStaging.value
 }
